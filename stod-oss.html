@@ -141,13 +141,7 @@
 <div class="autogiro-preview bg-autogiro-form" id="autogiro-preview">
 <div class="bg-form-top">
 <div>
-<div class="bankgirot-logo" aria-label="Bankgirot">
-<svg class="bankgirot-logo-svg" viewBox="0 0 238 48" role="img" aria-label="Bankgirot">
-<rect x="0" y="4" width="30" height="38" rx="3" fill="#a31945"></rect>
-<text x="4" y="33" fill="#fff" font-family="Georgia, 'Times New Roman', serif" font-size="27" font-weight="700">bg</text>
-<text x="36" y="34" fill="#a31945" font-family="Georgia, 'Times New Roman', serif" font-size="37" font-weight="700">bankgirot</text>
-</svg>
-</div>
+<div class="bankgirot-logo" aria-label="Bankgirot"><img src="images/forms/bankgirot-logo-reference.png" alt="Bankgirot"></div>
 <p>Ifylld och underskriven blankett skickas till betalningsmottagaren.<br>Notera: Blanketter som skickas till Bankgirot kommer inte att hanteras.</p>
 </div>
 <h3>Autogiroanmälan,<br>medgivande till kontonummer</h3>
@@ -510,6 +504,10 @@
 
   function printableHtml() {
     var clone = document.getElementById('autogiro-preview').cloneNode(true);
+    var logo = clone.querySelector('.bankgirot-logo img');
+    if (logo) {
+      logo.src = new URL(logo.getAttribute('src'), window.location.href).toString();
+    }
     var unsigned = clone.querySelector('[data-signature-status]');
     if (unsigned && signatureImage) unsigned.parentNode.removeChild(unsigned);
     var previewImage = clone.querySelector('#signature-preview-image');
@@ -522,7 +520,7 @@
     var open = clone.querySelector('.signature-open');
     if (open) open.parentNode.removeChild(open);
     return '<!doctype html><html lang="sv"><head><meta charset="utf-8"><title>Autogiroanmälan SIKF</title><style>' +
-      '@page{size:A4 portrait;margin:11mm}*{box-sizing:border-box}body{color:#111;font-family:Georgia,\"Times New Roman\",serif;margin:0}.bg-autogiro-form{border:0;margin:0;padding:0}.bg-form-top{align-items:flex-start;display:flex;justify-content:space-between;margin-bottom:17px}.bankgirot-logo{align-items:center;display:flex;margin-bottom:7px}.bankgirot-logo-svg{display:block;height:auto;width:150px}.bg-form-top p{color:#333;font-size:11px;line-height:1.2;margin:0}.bg-form-top h3{color:#333;font-family:Arial,sans-serif;font-size:18px;font-weight:800;line-height:1.15;margin:6px 0 0;text-align:right}.bg-form-columns,.bg-form-lower{display:grid;gap:18px;grid-template-columns:1fr 1fr}.bg-column h4,.bg-mandate-text h4{color:#333;font-family:Arial,sans-serif;font-size:13px;font-weight:800;margin:0 0 6px}.bg-field{border:1px solid #777;border-bottom:0;min-height:34px;padding:2px 6px 4px}.bg-field:last-of-type{border-bottom:1px solid #777}.bg-field-tall{min-height:56px}.bg-field label{color:#555;display:block;font-size:9.5px;font-weight:700;line-height:1.05;margin:0 0 2px}.bg-field span,.bg-field strong{color:#111;display:block;font-size:12px;font-weight:400;line-height:1.2;min-height:14px}.bg-field strong{font-weight:700}.bg-required{color:#333;font-size:10px;line-height:1.1;margin:5px 0 0}.bg-clearing-note{color:#333;font-size:8px;line-height:1.08;margin:8px 0 0}.bg-form-lower{align-items:start;margin-top:18px}.bg-mandate-text p{color:#222;font-size:12px;line-height:1.18;margin:0}.bg-signature-field{min-height:78px}.signature-preview{border-bottom:1px solid #777;min-height:39px}.signature-preview img{display:block;max-height:37px;max-width:100%;object-fit:contain;object-position:left bottom}.signature-preview em,.signature-open,.signature-clear{display:none}.bg-privacy-text{color:#333;font-size:10px;line-height:1.08;margin:20px 0 0}.bg-copyright{color:#555;font-size:8px;margin:34px 0 0}' +
+      '@page{size:A4 portrait;margin:11mm}*{box-sizing:border-box}body{color:#111;font-family:Georgia,\"Times New Roman\",serif;margin:0}.bg-autogiro-form{border:0;margin:0;padding:0}.bg-form-top{align-items:flex-start;display:flex;justify-content:space-between;margin-bottom:17px}.bankgirot-logo{align-items:center;display:flex;margin-bottom:7px}.bankgirot-logo img{display:block;height:auto;width:150px}.bg-form-top p{color:#333;font-size:11px;line-height:1.2;margin:0}.bg-form-top h3{color:#333;font-family:Arial,sans-serif;font-size:18px;font-weight:800;line-height:1.15;margin:6px 0 0;text-align:right}.bg-form-columns,.bg-form-lower{display:grid;gap:18px;grid-template-columns:1fr 1fr}.bg-column h4,.bg-mandate-text h4{color:#333;font-family:Arial,sans-serif;font-size:13px;font-weight:800;margin:0 0 6px}.bg-field{border:1px solid #777;border-bottom:0;min-height:34px;padding:2px 6px 4px}.bg-field:last-of-type{border-bottom:1px solid #777}.bg-field-tall{min-height:56px}.bg-field label{color:#555;display:block;font-size:9.5px;font-weight:700;line-height:1.05;margin:0 0 2px}.bg-field span,.bg-field strong{color:#111;display:block;font-size:12px;font-weight:400;line-height:1.2;min-height:14px}.bg-field strong{font-weight:700}.bg-required{color:#333;font-size:10px;line-height:1.1;margin:5px 0 0}.bg-clearing-note{color:#333;font-size:8px;line-height:1.08;margin:8px 0 0}.bg-form-lower{align-items:start;margin-top:18px}.bg-mandate-text p{color:#222;font-size:12px;line-height:1.18;margin:0}.bg-signature-field{min-height:78px}.signature-preview{border-bottom:1px solid #777;min-height:39px}.signature-preview img{display:block;max-height:37px;max-width:100%;object-fit:contain;object-position:left bottom}.signature-preview em,.signature-open,.signature-clear{display:none}.bg-privacy-text{color:#333;font-size:10px;line-height:1.08;margin:20px 0 0}.bg-copyright{color:#555;font-size:8px;margin:34px 0 0}' +
       '</style></head><body>' + clone.outerHTML + '</body></html>';
   }
 
