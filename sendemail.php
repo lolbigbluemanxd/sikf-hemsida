@@ -29,7 +29,7 @@ header('Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
 $defaultConfig = [
-    'email_to' => 'sikforening@gmail.com',
+    'email_to' => 'Mussamahad@gmail.com',
     'from_email' => 'no-reply@sikforening.se',
     'from_name' => 'SIKF Hemsida',
     'max_message_length' => 3000,
@@ -300,7 +300,7 @@ $body = implode("\n", $bodyLines);
 
 $fromName = clean_string((string) $config['from_name'], 80);
 $fromEmail = filter_var($config['from_email'], FILTER_VALIDATE_EMAIL) ? $config['from_email'] : 'no-reply@sikforening.se';
-$emailTo = filter_var($config['email_to'], FILTER_VALIDATE_EMAIL) ? $config['email_to'] : 'sikforening@gmail.com';
+$emailTo = filter_var($config['email_to'], FILTER_VALIDATE_EMAIL) ? $config['email_to'] : 'Mussamahad@gmail.com';
 
 $headers = [
     'MIME-Version: 1.0',

@@ -1239,8 +1239,42 @@ a,
   width: 198px;
 }
 
+.bankgirot-logo-text {
+  align-items: center;
+  color: #c41230;
+  display: inline-flex;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 40px;
+  font-weight: 700;
+  letter-spacing: -1px;
+  line-height: 1;
+}
+
+.bankgirot-logo-text span {
+  align-items: center;
+  background: #c41230;
+  color: #fff;
+  display: inline-flex;
+  font-size: 28px;
+  height: 40px;
+  justify-content: center;
+  letter-spacing: -1px;
+  margin-right: 5px;
+  width: 27px;
+}
+
 .pdf-export-form .bankgirot-logo img {
   width: 170px;
+}
+
+.pdf-export-form .bankgirot-logo-text {
+  font-size: 34px;
+}
+
+.pdf-export-form .bankgirot-logo-text span {
+  font-size: 24px;
+  height: 34px;
+  width: 23px;
 }
 
 .bg-form-top p {

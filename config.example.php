@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 return [
     // Copy this file to config.php and change these values on the server.
-    'email_to' => 'sikforening@gmail.com',
+    'email_to' => 'Mussamahad@gmail.com',
     'from_email' => 'no-reply@sikforening.se',
     'from_name' => 'SIKF Hemsida',
 
