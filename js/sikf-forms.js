@@ -129,6 +129,14 @@
       getCsrfToken()
         .then(function (token) {
           ensureHidden(form, 'csrf_token', token);
+          if (typeof form.sikfBeforeSubmit === 'function') {
+            return Promise.resolve(form.sikfBeforeSubmit()).then(function () {
+              return token;
+            });
+          }
+          return token;
+        })
+        .then(function () {
           return fetch(endpointUrl(), {
             method: 'POST',
             body: new FormData(form),
@@ -160,9 +168,11 @@
           showFeedback(form, 'error',
             (data && data.message) ? data.message : 'Något gick fel. Försök igen senare.');
         })
-        .catch(function () {
-          showFeedback(form, 'error',
-            'Anslutningsfel. Kontrollera att sidan körs på webbhotellet och försök igen.');
+        .catch(function (error) {
+          var message = error && error.message && error.message.indexOf('PDF') !== -1
+            ? error.message
+            : 'Anslutningsfel. Kontrollera att sidan körs på webbhotellet och försök igen.';
+          showFeedback(form, 'error', message);
         })
         .then(function () {
           setButtonLoading(btn, false);

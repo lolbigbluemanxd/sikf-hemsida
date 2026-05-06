@@ -33,6 +33,7 @@ $defaultConfig = [
     'from_email' => 'no-reply@sikforening.se',
     'from_name' => 'SIKF Hemsida',
     'max_message_length' => 3000,
+    'max_attachment_bytes' => 6000000,
     'rate_limit_count' => 5,
     'rate_limit_window_seconds' => 900,
 ];
@@ -77,6 +78,44 @@ function clean_multiline(?string $value, int $maxLength): string
         return mb_substr($value, 0, $maxLength, 'UTF-8');
     }
     return substr($value, 0, $maxLength);
+}
+
+function safe_filename(?string $value, string $fallback): string
+{
+    $value = trim((string) $value);
+    $value = preg_replace('/[^A-Za-z0-9._-]+/', '-', $value) ?? '';
+    $value = trim($value, '.-');
+    if ($value === '') {
+        $value = $fallback;
+    }
+    if (!preg_match('/\.pdf$/i', $value)) {
+        $value .= '.pdf';
+    }
+    return substr($value, 0, 120);
+}
+
+function autogiro_pdf_attachment(?string $dataUri, ?string $filename, int $maxBytes): ?array
+{
+    $dataUri = trim((string) $dataUri);
+    if ($dataUri === '') {
+        return null;
+    }
+    if (!preg_match('/^data:application\/pdf(?:;[^,]*)?;base64,([A-Za-z0-9+\/=\s]+)$/i', $dataUri, $matches)) {
+        json_response(false, 'PDF-bilagan har fel format.', 422);
+    }
+    $base64 = preg_replace('/\s+/', '', $matches[1]) ?? '';
+    if (strlen($base64) > (int) ceil($maxBytes * 1.4)) {
+        json_response(false, 'PDF-bilagan är för stor.', 413);
+    }
+    $binary = base64_decode($base64, true);
+    if ($binary === false || strlen($binary) > $maxBytes || substr($binary, 0, 5) !== '%PDF-') {
+        json_response(false, 'PDF-bilagan kunde inte läsas.', 422);
+    }
+
+    return [
+        'filename' => safe_filename($filename, 'sikf-autogiro.pdf'),
+        'content' => $binary,
+    ];
 }
 
 function is_same_origin_request(): bool
@@ -205,6 +244,11 @@ $amountRaw = clean_string($_POST['amount'] ?? '', 12);
 $amount = filter_var($amountRaw, FILTER_VALIDATE_INT, [
     'options' => ['min_range' => 1, 'max_range' => 50000],
 ]);
+$attachment = autogiro_pdf_attachment(
+    $_POST['autogiro_pdf'] ?? '',
+    $_POST['autogiro_pdf_filename'] ?? '',
+    (int) $config['max_attachment_bytes']
+);
 
 if ($isDonor) {
     if ($firstName === '' || $lastName === '') {
@@ -221,6 +265,9 @@ if ($isDonor) {
     }
     if ($bank === '' || $bankAccount === '' || $signaturePlaceDate === '') {
         json_response(false, 'Fyll i bankuppgifter och ort/datum för autogiroanmälan.', 422);
+    }
+    if ($attachment === null) {
+        json_response(false, 'Den ifyllda PDF-blanketten saknas. Försök igen eller ladda ner PDF och kontakta SIKF.', 422);
     }
 } else {
     if ($name === '' || $subject === '' || $message === '') {
@@ -257,13 +304,30 @@ $emailTo = filter_var($config['email_to'], FILTER_VALIDATE_EMAIL) ? $config['ema
 
 $headers = [
     'MIME-Version: 1.0',
-    'Content-Type: text/plain; charset=UTF-8',
     'From: ' . $fromName . ' <' . $fromEmail . '>',
     'Reply-To: ' . $email,
     'X-Mailer: PHP/' . PHP_VERSION,
 ];
 
-$sent = mail($emailTo, $mailSubject, $body, implode("\r\n", $headers));
+$mailBody = $body;
+if ($attachment !== null) {
+    $boundary = 'SIKF-' . bin2hex(random_bytes(16));
+    $headers[] = 'Content-Type: multipart/mixed; boundary="' . $boundary . '"';
+    $mailBody = "--{$boundary}\r\n";
+    $mailBody .= "Content-Type: text/plain; charset=UTF-8\r\n";
+    $mailBody .= "Content-Transfer-Encoding: 8bit\r\n\r\n";
+    $mailBody .= $body . "\r\n\r\n";
+    $mailBody .= "--{$boundary}\r\n";
+    $mailBody .= 'Content-Type: application/pdf; name="' . $attachment['filename'] . '"' . "\r\n";
+    $mailBody .= "Content-Transfer-Encoding: base64\r\n";
+    $mailBody .= 'Content-Disposition: attachment; filename="' . $attachment['filename'] . '"' . "\r\n\r\n";
+    $mailBody .= chunk_split(base64_encode($attachment['content'])) . "\r\n";
+    $mailBody .= "--{$boundary}--";
+} else {
+    $headers[] = 'Content-Type: text/plain; charset=UTF-8';
+}
+
+$sent = mail($emailTo, $mailSubject, $mailBody, implode("\r\n", $headers));
 log_event($isDonor ? 'donor_form' : 'contact_form', [
     'subject' => $subject,
     'email' => $email,
@@ -275,6 +339,6 @@ if (!$sent) {
 }
 
 json_response(true, $isDonor
-    ? 'Tack! Din anmälan är skickad. SIKF kontaktar dig med nästa steg.'
+    ? 'Tack! Din ifyllda PDF-blankett är skickad till SIKF.'
     : 'Tack för ditt meddelande. SIKF kontaktar dig så snart som möjligt.'
 );

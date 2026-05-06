@@ -13,6 +13,7 @@ return [
 
     // Maximum length for contact message text.
     'max_message_length' => 3000,
+    'max_attachment_bytes' => 6000000,
 
     // BankID/Autogiro preparation. Keep disabled until SIKF has a real provider.
     'bankid_enabled' => false,

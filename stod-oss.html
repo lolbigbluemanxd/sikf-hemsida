@@ -46,6 +46,8 @@
 <input type="hidden" name="message" id="support-message" value="">
 <input type="hidden" name="amount" id="amount-input" value="150">
 <input type="hidden" name="signature_data" id="signature-data" value="">
+<input type="hidden" name="autogiro_pdf" id="autogiro-pdf-data" value="">
+<input type="hidden" name="autogiro_pdf_filename" id="autogiro-pdf-filename" value="">
 
 <div class="flow-progress" aria-label="Steg">
 <span class="active" data-progress="1">1</span>
@@ -189,7 +191,7 @@
 <button type="button" class="btn btn-default print-autogiro">Skriv ut blankett</button>
 <button type="button" class="btn btn-default download-autogiro">Ladda ner PDF</button>
 <button type="button" class="btn btn-primary email-autogiro">Skicka via e-post</button>
-<button type="submit" class="btn btn-primary">Skicka anmälan till SIKF</button>
+<button type="submit" class="btn btn-primary submit-autogiro">Skicka ifylld PDF</button>
 </div>
 <p class="bg-official-link"><a href="docs/bankgirot-autogiro-medgivande-till-kontonummer.pdf" target="_blank" rel="noopener">Öppna Bankgirots originalblankett</a></p>
 <a class="cancel-payment" href="stod-oss.html">Avbryt anmälan</a>
@@ -299,6 +301,8 @@
   var signaturePreview = document.getElementById('signature-preview-image');
   var signatureStatus = form.querySelector('[data-signature-status]');
   var signatureBox = form.querySelector('.signature-box');
+  var autogiroPdfInput = document.getElementById('autogiro-pdf-data');
+  var autogiroPdfFilenameInput = document.getElementById('autogiro-pdf-filename');
   var signatureHasInk = false;
   var signatureImage = '';
   var resizeSignatureCanvas = function () {};
@@ -571,6 +575,10 @@
       .replace(/[^a-z0-9-]+/g, '-') || 'blankett');
   }
 
+  function autogiroPdfFilename() {
+    return 'sikf-autogiro-' + fileSafeName() + '.pdf';
+  }
+
   function printAutogiro() {
     updateSummary();
     if (!requireSignature()) return;
@@ -591,19 +599,22 @@
     }, 300);
   }
 
-  function downloadAutogiro() {
+  function createAutogiroPdf(options) {
+    options = options || {};
     updateSummary();
-    if (!requireSignature()) return Promise.resolve(false);
+    if (!requireSignature()) return Promise.resolve({ ok: false });
     if (!window.html2canvas || !window.jspdf || !window.jspdf.jsPDF) {
-      alert('PDF-exporten kunde inte laddas. Använd "Skriv ut blankett" och välj Spara som PDF.');
-      printAutogiro();
-      return Promise.resolve(false);
+      if (!options.silent) {
+        alert('PDF-exporten kunde inte laddas. Använd "Skriv ut blankett" och välj Spara som PDF.');
+        printAutogiro();
+      }
+      return Promise.resolve({ ok: false });
     }
 
-    var button = form.querySelector('.download-autogiro');
+    var button = options.button || null;
     if (button) {
       button.dataset.originalLabel = button.textContent;
-      button.textContent = 'Skapar PDF...';
+      button.textContent = options.loadingText || 'Skapar PDF...';
       button.disabled = true;
     }
     document.body.classList.add('is-exporting-autogiro');
@@ -631,11 +642,15 @@
         x = (pageWidth - imgWidth) / 2;
       }
       pdf.addImage(canvas.toDataURL('image/png'), 'PNG', x, y, imgWidth, imgHeight);
-      pdf.save('sikf-autogiro-' + fileSafeName() + '.pdf');
-      return true;
+      if (options.save) pdf.save(autogiroPdfFilename());
+      return {
+        ok: true,
+        filename: autogiroPdfFilename(),
+        dataUri: options.dataUri ? pdf.output('datauristring') : ''
+      };
     }).catch(function () {
-      alert('PDF kunde inte skapas automatiskt. Använd "Skriv ut blankett" och välj Spara som PDF.');
-      return false;
+      if (!options.silent) alert('PDF kunde inte skapas automatiskt. Använd "Skriv ut blankett" och välj Spara som PDF.');
+      return { ok: false };
     }).then(function (ok) {
       document.body.classList.remove('is-exporting-autogiro');
       if (exportWrap.parentNode) exportWrap.parentNode.removeChild(exportWrap);
@@ -644,6 +659,30 @@
         button.textContent = button.dataset.originalLabel || 'Ladda ner PDF';
       }
       return ok;
+    });
+  }
+
+  function downloadAutogiro() {
+    return createAutogiroPdf({
+      button: form.querySelector('.download-autogiro'),
+      loadingText: 'Skapar PDF...',
+      save: true
+    }).then(function (result) {
+      return !!(result && result.ok);
+    });
+  }
+
+  function prepareAutogiroSubmit() {
+    return createAutogiroPdf({
+      loadingText: 'Skapar PDF...',
+      dataUri: true,
+      silent: true
+    }).then(function (result) {
+      if (!result || !result.ok || !result.dataUri) {
+        throw new Error('PDF kunde inte skapas.');
+      }
+      if (autogiroPdfInput) autogiroPdfInput.value = result.dataUri;
+      if (autogiroPdfFilenameInput) autogiroPdfFilenameInput.value = result.filename || autogiroPdfFilename();
     });
   }
 
@@ -753,6 +792,8 @@
 
   var emailButton = form.querySelector('.email-autogiro');
   if (emailButton) emailButton.addEventListener('click', emailAutogiro);
+
+  form.sikfBeforeSubmit = prepareAutogiroSubmit;
 
   var submitButton = form.querySelector('button[type="submit"]');
   if (submitButton && (window.location.hostname.indexOf('github.io') !== -1 || window.location.protocol === 'file:')) {
