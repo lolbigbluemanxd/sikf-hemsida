@@ -1173,6 +1173,21 @@ a,
   padding: 30px 34px;
 }
 
+.pdf-export-stage {
+  background: #fff;
+  left: -100000px;
+  position: fixed;
+  top: 0;
+  z-index: -1;
+}
+
+.pdf-export-form {
+  border: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 900px !important;
+}
+
 .bg-form-top {
   align-items: flex-start;
   display: flex;
@@ -1190,6 +1205,10 @@ a,
   display: block;
   height: auto;
   width: 198px;
+}
+
+.pdf-export-form .bankgirot-logo img {
+  width: 170px;
 }
 
 .bg-form-top p {
@@ -1477,6 +1496,11 @@ body.is-exporting-autogiro .cancel-payment {
 body.is-exporting-autogiro .signature-box {
   background: #fff !important;
   outline: 0 !important;
+}
+
+body.is-exporting-autogiro .pdf-export-form .signature-preview {
+  border-bottom: 1px solid #777 !important;
+  min-height: 39px !important;
 }
 
 .email-autogiro {

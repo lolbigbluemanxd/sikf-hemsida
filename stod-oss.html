@@ -141,7 +141,7 @@
 <div class="autogiro-preview bg-autogiro-form" id="autogiro-preview">
 <div class="bg-form-top">
 <div>
-<div class="bankgirot-logo" aria-label="Bankgirot"><img src="images/forms/bankgirot-logo-reference.png" alt="Bankgirot"></div>
+<div class="bankgirot-logo" aria-label="Bankgirot"><img src="images/forms/bankgirot-logo-reference-transparent.png" alt="Bankgirot"></div>
 <p>Ifylld och underskriven blankett skickas till betalningsmottagaren.<br>Notera: Blanketter som skickas till Bankgirot kommer inte att hanteras.</p>
 </div>
 <h3>Autogiroanmälan,<br>medgivande till kontonummer</h3>
@@ -524,6 +524,28 @@
       '</style></head><body>' + clone.outerHTML + '</body></html>';
   }
 
+  function prepareExportClone() {
+    var source = document.getElementById('autogiro-preview');
+    var clone = source.cloneNode(true);
+    var logo = clone.querySelector('.bankgirot-logo img');
+    if (logo) {
+      logo.src = new URL(logo.getAttribute('src'), window.location.href).toString();
+    }
+    var unsigned = clone.querySelector('[data-signature-status]');
+    if (unsigned && signatureImage) unsigned.parentNode.removeChild(unsigned);
+    var previewImage = clone.querySelector('#signature-preview-image');
+    if (previewImage && signatureImage) {
+      previewImage.src = signatureImage;
+      previewImage.hidden = false;
+    }
+    var clear = clone.querySelector('.signature-clear');
+    if (clear) clear.parentNode.removeChild(clear);
+    var open = clone.querySelector('.signature-open');
+    if (open) open.parentNode.removeChild(open);
+    clone.classList.add('pdf-export-form');
+    return clone;
+  }
+
   function requireSignature() {
     if (signatureImage) return true;
     if (signatureBox) {
@@ -571,7 +593,6 @@
       return Promise.resolve(false);
     }
 
-    var target = document.getElementById('autogiro-preview');
     var button = form.querySelector('.download-autogiro');
     if (button) {
       button.dataset.originalLabel = button.textContent;
@@ -579,8 +600,13 @@
       button.disabled = true;
     }
     document.body.classList.add('is-exporting-autogiro');
+    var exportWrap = document.createElement('div');
+    exportWrap.className = 'pdf-export-stage';
+    var exportClone = prepareExportClone();
+    exportWrap.appendChild(exportClone);
+    document.body.appendChild(exportWrap);
 
-    return window.html2canvas(target, {
+    return window.html2canvas(exportClone, {
       backgroundColor: '#ffffff',
       scale: 2.4,
       useCORS: true
@@ -605,6 +631,7 @@
       return false;
     }).then(function (ok) {
       document.body.classList.remove('is-exporting-autogiro');
+      if (exportWrap.parentNode) exportWrap.parentNode.removeChild(exportWrap);
       if (button) {
         button.disabled = false;
         button.textContent = button.dataset.originalLabel || 'Ladda ner PDF';
