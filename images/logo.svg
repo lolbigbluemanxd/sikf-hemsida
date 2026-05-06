@@ -1,0 +1,58 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="SIKF logotyp">
+  <!-- circular cream background -->
+  <circle cx="100" cy="100" r="98" fill="#fbf6e3"/>
+  <circle cx="100" cy="100" r="95" fill="none" stroke="#d4a83a" stroke-width="2"/>
+
+  <!-- Mihrab arch: gold outer trim + thin green inner outline -->
+  <path d="M 56 148
+           L 56 90
+           Q 56 64 76 60
+           L 79 48 L 83 56
+           Q 100 36 117 56
+           L 121 48 L 124 60
+           Q 144 64 144 90
+           L 144 148 Z"
+        fill="none" stroke="#e6883a" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M 56 148
+           L 56 90
+           Q 56 64 76 60
+           L 79 48 L 83 56
+           Q 100 36 117 56
+           L 121 48 L 124 60
+           Q 144 64 144 90
+           L 144 148 Z"
+        fill="none" stroke="#0f7f5f" stroke-width="2.2" stroke-linejoin="round"/>
+
+  <!-- Palm tree on top of dome -->
+  <g transform="translate(100, 44)">
+    <line x1="0" y1="0" x2="0" y2="-9" stroke="#5a3a1a" stroke-width="1.6" stroke-linecap="round"/>
+    <path d="M 0 -9 Q -7 -11 -12 -8" fill="none" stroke="#1a8a55" stroke-width="2.6" stroke-linecap="round"/>
+    <path d="M 0 -9 Q  7 -11  12 -8" fill="none" stroke="#1a8a55" stroke-width="2.6" stroke-linecap="round"/>
+    <path d="M 0 -9 Q -3 -15 -5 -17" fill="none" stroke="#1a8a55" stroke-width="2.6" stroke-linecap="round"/>
+    <path d="M 0 -9 Q  3 -15  5 -17" fill="none" stroke="#1a8a55" stroke-width="2.6" stroke-linecap="round"/>
+    <path d="M 0 -9 L 0 -17" stroke="#1a8a55" stroke-width="2.6" stroke-linecap="round"/>
+  </g>
+
+  <!-- Open Quran on rehal -->
+  <g transform="translate(100, 110)">
+    <!-- rehal X-stand legs -->
+    <line x1="-22" y1="22" x2="20" y2="-2" stroke="#8b5a2b" stroke-width="3.6" stroke-linecap="round"/>
+    <line x1="22" y1="22" x2="-20" y2="-2" stroke="#8b5a2b" stroke-width="3.6" stroke-linecap="round"/>
+    <!-- left page -->
+    <path d="M -25 0 Q -15 -8 -1 -6 L -1 6 Q -15 4 -25 8 Z" fill="#fff" stroke="#7a6a4a" stroke-width="0.7"/>
+    <!-- right page -->
+    <path d="M 25 0 Q 15 -8 1 -6 L 1 6 Q 15 4 25 8 Z" fill="#fff" stroke="#7a6a4a" stroke-width="0.7"/>
+    <!-- subtle page lines -->
+    <line x1="-20" y1="-1" x2="-5" y2="-4" stroke="#bbb" stroke-width="0.4"/>
+    <line x1="-20" y1="3"  x2="-5" y2="0"  stroke="#bbb" stroke-width="0.4"/>
+    <line x1="20"  y1="-1" x2="5"  y2="-4" stroke="#bbb" stroke-width="0.4"/>
+    <line x1="20"  y1="3"  x2="5"  y2="0"  stroke="#bbb" stroke-width="0.4"/>
+  </g>
+
+  <!-- Ribbon banner with SIKF text -->
+  <path d="M 30 152 L 50 145 L 50 168 L 30 165 L 38 158 Z" fill="#c87328"/>
+  <path d="M 170 152 L 150 145 L 150 168 L 170 165 L 162 158 Z" fill="#c87328"/>
+  <rect x="50" y="145" width="100" height="23" fill="#e6883a"/>
+  <rect x="50" y="166" width="100" height="3" fill="#c87328"/>
+  <text x="100" y="161" font-family="Georgia, 'Times New Roman', serif" font-size="15" font-weight="bold" fill="#0f5a3d" text-anchor="middle" letter-spacing="2.5">SIKF</text>
+</svg>

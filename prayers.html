@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Bönetider för SIKF - Somaliska Islamiska Kulturföreningen.">
+<title>Bönetider | SIKF</title>
+<link href="css/bootstrap.min.css" rel="stylesheet">
+<link href="css/font-awesome.min.css" rel="stylesheet">
+<link href="css/main.css" rel="stylesheet">
+<link href="css/responsive.css" rel="stylesheet">
+<link href="css/custom.css" rel="stylesheet">
+</head>
+<body class="sikf-site">
+<header id="header">
+<div class="top-bar"><div class="container"><div class="top-number"><p><i class="fa fa-clock-o"></i> Bönetider enligt SIKF:s officiella kalender</p></div></div></div>
+<nav class="navbar navbar-inverse" role="banner"><div class="container"><div class="navbar-header"><button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse"><span class="sr-only">Visa meny</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></button><a class="navbar-brand brand-text" href="index.html"><img src="images/sikf-real/facebook-profile.png" alt="SIKF logotyp" class="brand-logo"><span>SIKF</span></a></div><div class="collapse navbar-collapse navbar-right"><ul class="nav navbar-nav"><li><a href="index.html">Startsida</a></li><li><a href="about-us.html">Om SIKF</a></li><li class="active"><a href="prayers.html">Bönetider</a></li><li><a href="portfolio.html">Verksamhet</a></li><li><a href="stod-oss.html">Stöd oss</a></li><li><a href="contact-us.html">Kontakt</a></li></ul></div></div></nav>
+</header>
+
+<section class="page-title">
+<div class="container">
+<h1>Bönetider</h1>
+<p>En tydlig sida för dagliga böner, Jumu'ah och praktisk information för medlemmar och besökare.</p>
+</div>
+</section>
+
+<section class="prayer-page">
+<div class="container">
+<div class="row">
+<div class="col-md-8">
+<p id="sikf-prayer-date" class="prayer-date-line">Hämtar dagens datum…</p>
+<div id="sikf-prayer-error" class="prayer-error" style="display:none">
+Tiderna kunde inte hämtas just nu. Kontrollera Awqat Salah-appen för exakta tider för Trollhättan.
+</div>
+<div class="table-responsive prayer-table">
+<table class="table table-striped">
+<thead><tr><th>Bön</th><th>Tid</th><th>Notering</th></tr></thead>
+<tbody>
+<tr><td>Fajr</td><td data-prayer="Fajr">—</td><td>Gryning, första dagliga bön</td></tr>
+<tr><td>Soluppgång</td><td data-prayer="Sunrise">—</td><td>Slut Fajr-tid</td></tr>
+<tr><td>Dhuhr</td><td data-prayer="Dhuhr">—</td><td>Mitt på dagen</td></tr>
+<tr><td>Asr</td><td data-prayer="Asr">—</td><td>Eftermiddag</td></tr>
+<tr><td>Maghrib</td><td data-prayer="Maghrib">—</td><td>Vid solnedgång</td></tr>
+<tr><td>Isha</td><td data-prayer="Isha">—</td><td>Natt</td></tr>
+<tr><td>Jumu'ah</td><td>13:00</td><td>Fredagsbön, kom i god tid</td></tr>
+</tbody>
+</table>
+</div>
+<p class="prayer-source-note">Tiderna räknas dagligen automatiskt för Trollhättan med Diyanet/Awqat Salah-liknande metod och lokal SIKF-justering. Källa tills officiell Awqat Salah API-inloggning finns: api.aladhan.com.</p>
+</div>
+<div class="col-md-4">
+<div class="notice-card">
+<h3><i class="fa fa-info-circle"></i> Viktigt</h3>
+<p>Tiderna är kontrollerade mot SIKF:s maj-kalender och beräknas automatiskt varje dag.</p>
+<p>Officiell Awqat Salah API kan kopplas in när SIKF har fått användarnamn och lösenord från Diyanet.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<section class="sikf-cta">
+<div class="container"><h2>Fredagsbön</h2><p>Publicera aktuell khutbah-tid, andra jama'ah och eventuell information om parkering eller ingång här.</p></div>
+</section>
+
+<footer id="footer" class="midnight-blue"><div class="container"><div class="row"><div class="col-sm-6">&copy; 2026 SIKF - Somaliska Islamiska Kulturföreningen.</div><div class="col-sm-6"><ul class="pull-right"><li><a href="index.html">Startsida</a></li><li><a href="stod-oss.html">Stöd oss</a></li><li><a href="contact-us.html">Kontakt</a></li></ul></div></div></div></footer>
+<script src="js/jquery.js"></script><script src="js/bootstrap.min.js"></script>
+<script src="js/sikf-prayer-times.js"></script>
+</body>
+</html>

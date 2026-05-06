@@ -1,0 +1,5 @@
+config.php
+storage/*.log
+storage/rate_limit/*.json
+backups/*.zip
+localtunnel*.log
