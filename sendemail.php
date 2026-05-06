@@ -39,6 +39,13 @@ $defaultConfig = [
     'max_attachment_bytes' => 6000000,
     'rate_limit_count' => 5,
     'rate_limit_window_seconds' => 900,
+    'smtp_enabled' => false,
+    'smtp_host' => '',
+    'smtp_port' => 587,
+    'smtp_username' => '',
+    'smtp_password' => '',
+    'smtp_encryption' => 'tls',
+    'smtp_timeout_seconds' => 15,
 ];
 
 $configPath = __DIR__ . '/config.php';
@@ -198,6 +205,105 @@ function log_event(string $type, array $context = []): void
     );
 }
 
+function smtp_read_response($socket, array $expectedCodes): string
+{
+    $response = '';
+    while (($line = fgets($socket, 515)) !== false) {
+        $response .= $line;
+        if (isset($line[3]) && $line[3] === ' ') {
+            break;
+        }
+    }
+
+    $code = (int) substr($response, 0, 3);
+    if (!in_array($code, $expectedCodes, true)) {
+        throw new RuntimeException('SMTP error: ' . trim($response));
+    }
+
+    return $response;
+}
+
+function smtp_command($socket, string $command, array $expectedCodes): string
+{
+    fwrite($socket, $command . "\r\n");
+    return smtp_read_response($socket, $expectedCodes);
+}
+
+function smtp_dot_stuff(string $message): string
+{
+    $message = str_replace(["\r\n", "\r"], "\n", $message);
+    $message = str_replace("\n", "\r\n", $message);
+    return preg_replace('/^\./m', '..', $message) ?? $message;
+}
+
+function send_smtp_mail(array $config, string $to, string $fromEmail, string $fromName, string $replyTo, string $subject, array $headers, string $body): bool
+{
+    $host = clean_string($config['smtp_host'] ?? '', 255);
+    $username = clean_string($config['smtp_username'] ?? '', 255);
+    $password = (string) ($config['smtp_password'] ?? '');
+    $port = (int) ($config['smtp_port'] ?? 587);
+    $timeout = max(5, (int) ($config['smtp_timeout_seconds'] ?? 15));
+    $encryption = strtolower(clean_string($config['smtp_encryption'] ?? 'tls', 12));
+
+    if ($host === '' || $username === '' || $password === '' || !filter_var($to, FILTER_VALIDATE_EMAIL)) {
+        return false;
+    }
+
+    $transport = $encryption === 'ssl' ? 'ssl://' : '';
+    $socket = @stream_socket_client(
+        $transport . $host . ':' . $port,
+        $errno,
+        $errstr,
+        $timeout,
+        STREAM_CLIENT_CONNECT
+    );
+
+    if (!$socket) {
+        error_log('SMTP connect failed: ' . $errstr . ' (' . $errno . ')');
+        return false;
+    }
+
+    stream_set_timeout($socket, $timeout);
+
+    try {
+        smtp_read_response($socket, [220]);
+        $serverName = preg_replace('/[^A-Za-z0-9.-]/', '', $_SERVER['SERVER_NAME'] ?? 'localhost') ?: 'localhost';
+        smtp_command($socket, 'EHLO ' . $serverName, [250]);
+
+        if ($encryption === 'tls') {
+            smtp_command($socket, 'STARTTLS', [220]);
+            if (!stream_socket_enable_crypto($socket, true, STREAM_CRYPTO_METHOD_TLS_CLIENT)) {
+                throw new RuntimeException('SMTP TLS could not start.');
+            }
+            smtp_command($socket, 'EHLO ' . $serverName, [250]);
+        }
+
+        smtp_command($socket, 'AUTH LOGIN', [334]);
+        smtp_command($socket, base64_encode($username), [334]);
+        smtp_command($socket, base64_encode($password), [235]);
+
+        $envelopeFrom = filter_var($fromEmail, FILTER_VALIDATE_EMAIL) ? $fromEmail : $username;
+        smtp_command($socket, 'MAIL FROM:<' . $envelopeFrom . '>', [250]);
+        smtp_command($socket, 'RCPT TO:<' . $to . '>', [250, 251]);
+        smtp_command($socket, 'DATA', [354]);
+
+        $rawHeaders = array_merge([
+            'To: ' . $to,
+            'Subject: ' . $subject,
+        ], $headers);
+
+        fwrite($socket, smtp_dot_stuff(implode("\r\n", $rawHeaders) . "\r\n\r\n" . $body) . "\r\n.\r\n");
+        smtp_read_response($socket, [250]);
+        smtp_command($socket, 'QUIT', [221]);
+        fclose($socket);
+        return true;
+    } catch (Throwable $e) {
+        error_log($e->getMessage());
+        fclose($socket);
+        return false;
+    }
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     json_response(true, 'CSRF-token hämtad.', 200, ['csrf_token' => csrf_token()]);
 }
@@ -330,7 +436,9 @@ if ($attachment !== null) {
     $headers[] = 'Content-Type: text/plain; charset=UTF-8';
 }
 
-$sent = @mail($emailTo, $mailSubject, $mailBody, implode("\r\n", $headers));
+$sent = !empty($config['smtp_enabled'])
+    ? send_smtp_mail($config, $emailTo, $fromEmail, $fromName, $email, $mailSubject, $headers, $mailBody)
+    : @mail($emailTo, $mailSubject, $mailBody, implode("\r\n", $headers));
 log_event($isDonor ? 'donor_form' : 'contact_form', [
     'subject' => $subject,
     'email' => $email,

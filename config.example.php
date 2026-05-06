@@ -15,6 +15,16 @@ return [
     'max_message_length' => 3000,
     'max_attachment_bytes' => 6000000,
 
+    // SMTP e-mail delivery. Copy this file to config.php and fill these on the server.
+    // For Gmail: enable 2-step verification, create an app password, then use smtp.gmail.com:587 tls.
+    'smtp_enabled' => false,
+    'smtp_host' => 'smtp.gmail.com',
+    'smtp_port' => 587,
+    'smtp_username' => '',
+    'smtp_password' => '',
+    'smtp_encryption' => 'tls',
+    'smtp_timeout_seconds' => 15,
+
     // BankID/Autogiro preparation. Keep disabled until SIKF has a real provider.
     'bankid_enabled' => false,
     'bankid_provider_name' => '',
