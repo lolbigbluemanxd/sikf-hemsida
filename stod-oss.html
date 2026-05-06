@@ -138,6 +138,7 @@
 <h3>5. Autogiroblankett</h3>
 <p class="helper-note">Kontrollera uppgifterna, tryck på Underskriv och skicka sedan blanketten till SIKF. Föreningen skickar underlaget vidare enligt bankens rutin.</p>
 <div class="signature-callout"><strong>Underskrift krävs</strong><span>Tryck på knappen <b>Underskriv</b>, skriv din signatur och spara den innan du skriver ut eller skickar blanketten.</span></div>
+<div class="required-fields-note"><strong>Fyll bara i markerade fält</strong><span>Grön markering visar de platser som kunden ansvarar för: betalare, personnummer, bank, konto, ort/datum och underskrift. Övriga rutor är föreningens uppgifter eller lämnas tomma.</span></div>
 <div class="autogiro-preview bg-autogiro-form" id="autogiro-preview">
 <div class="bg-form-top">
 <div>
@@ -157,11 +158,11 @@
 </div>
 <div class="bg-column">
 <h4>Betalare</h4>
-<div class="bg-field"><label>Namn*</label><span data-ag="name"></span></div>
-<div class="bg-field bg-field-tall"><label>Fullständig adress</label><span data-ag="address"></span></div>
-<div class="bg-field"><label>Person-/organisationsnummer (10 siffror)*</label><span data-ag="personal"></span></div>
-<div class="bg-field"><label>Betaltjänstleverantör*</label><span data-ag="bank"></span></div>
-<div class="bg-field"><label>Konto (Clearingnummer+kontonummer)*</label><span data-ag="account"></span></div>
+<div class="bg-field bg-user-field"><label>Namn*</label><span data-ag="name"></span></div>
+<div class="bg-field bg-field-tall bg-user-field"><label>Fullständig adress</label><span data-ag="address"></span></div>
+<div class="bg-field bg-user-field"><label>Person-/organisationsnummer (10 siffror)*</label><span data-ag="personal"></span></div>
+<div class="bg-field bg-user-field"><label>Betaltjänstleverantör*</label><span data-ag="bank"></span></div>
+<div class="bg-field bg-user-field"><label>Konto (Clearingnummer+kontonummer)*</label><span data-ag="account"></span></div>
 <div class="bg-field"><label>Betalar-/kundnummer</label><span></span></div>
 <p class="bg-clearing-note">Clearingnumret är det fyrsiffriga nummer som betecknar ett kontor eller en avdelning hos betaltjänstleverantören, se kontoutdraget. Normalt är clearingnumret de första fyra siffrorna i kontonumret. Swedbank har ibland fem siffror, ex 8327 - 9XXXXX. Utelämna då femte siffran, i detta fall 9. Handelsbankens clearingnummer ska alltid börja med 6 (hittar du inte det ange 6000). Personkonto i Nordea där kontonumret är samma som ditt personnummer: Clearingnummer = 3300 - ÅÅMMDDXXXX. Personkonto i Nordea där kontonumret inte är ett personnummer: Clearingnummer = de fyra första siffrorna i kontonumret. PlusGirokontot i Nordea: Clearingnummer = 9960.</p>
 </div>
@@ -172,8 +173,8 @@
 <p>Undertecknad ("betalaren"), medger att betalning får göras genom uttag från angivet konto, på begäran av angiven betalningsmottagare för betalning till denne på viss dag ("förfallodagen") via Autogiro.</p>
 </div>
 <div class="bg-signature-fields">
-<div class="bg-field"><label>Ort och datum*</label><strong data-ag="placeDate"></strong></div>
-<div class="bg-field bg-signature-field signature-box signature-missing"><label>Betalarens underskrift*</label><div class="signature-preview"><img id="signature-preview-image" alt="Betalarens underskrift" hidden><em data-signature-status>Underskrift saknas</em></div><button type="button" class="btn btn-primary signature-open">Underskriv här</button></div>
+<div class="bg-field bg-user-field"><label>Ort och datum*</label><strong data-ag="placeDate"></strong></div>
+<div class="bg-field bg-signature-field signature-box signature-missing bg-user-field"><label>Betalarens underskrift*</label><div class="signature-preview"><img id="signature-preview-image" alt="Betalarens underskrift" hidden><em data-signature-status>Underskrift saknas</em></div><button type="button" class="btn btn-primary signature-open">Underskriv här</button></div>
 </div>
 </div>
 <p class="bg-privacy-text">Betalaren samtycker till att behandling av personuppgifter som lämnats i detta medgivande behandlas av betalarens betaltjänstleverantör, betalningsmottagaren, betalningsmottagarens betaltjänstleverantör och Bankgirocentralen BGC AB för administration av tjänsten. Personuppgiftsansvariga för denna personuppgiftsbehandling är betalarens betaltjänstleverantör, betalningsmottagaren samt betalningsmottagarens betaltjänstleverantör. Betalaren kan när som helst begära att få tillgång till eller rättelse av personuppgifterna genom att kontakta betalarens betaltjänstleverantör. Ytterligare information om behandling av personuppgifter i samband med betalningar kan finnas i villkoren för kontot och i avtalet med betalningsmottagaren. Betalaren kan när som helst återkalla sitt samtycke, vilket medför att tjänsten i sin helhet avslutas.</p>
@@ -297,6 +298,7 @@
   var signatureHasInk = false;
   var signatureImage = '';
   var resizeSignatureCanvas = function () {};
+  var donorPage = form.closest ? form.closest('.monthly-donor-page') : null;
 
   function showStep(step) {
     currentStep = step;
@@ -306,6 +308,7 @@
     Array.prototype.forEach.call(form.querySelectorAll('.flow-progress span'), function (dot) {
       dot.classList.toggle('active', Number(dot.getAttribute('data-progress')) <= step);
     });
+    if (donorPage) donorPage.classList.toggle('is-autogiro-review', step === 5);
     updateSummary();
     try {
       form.dispatchEvent(new CustomEvent('sikf:donor-step', { detail: { step: step } }));
@@ -748,7 +751,7 @@
   if (emailButton) emailButton.addEventListener('click', emailAutogiro);
 
   var submitButton = form.querySelector('button[type="submit"]');
-  if (submitButton && window.location.hostname.indexOf('github.io') !== -1) {
+  if (submitButton && (window.location.hostname.indexOf('github.io') !== -1 || window.location.protocol === 'file:')) {
     submitButton.style.display = 'none';
   }
 
