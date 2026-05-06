@@ -1246,6 +1246,32 @@ a,
   margin-bottom: 18px;
 }
 
+.signature-box {
+  position: relative;
+}
+
+#signature-canvas {
+  background: #fff;
+  border-bottom: 1px solid #777;
+  cursor: crosshair;
+  display: block;
+  height: 74px;
+  margin-top: 4px;
+  touch-action: none;
+  width: 100%;
+}
+
+.signature-clear {
+  background: transparent;
+  border: 0;
+  color: var(--sikf-green);
+  font-size: 13px;
+  font-weight: 800;
+  margin-top: 6px;
+  padding: 0;
+  text-decoration: underline;
+}
+
 .print-autogiro {
   border-color: var(--sikf-green);
   color: var(--sikf-green);
@@ -1378,23 +1404,52 @@ a,
   }
 }
 
+@page {
+  size: A4 portrait;
+  margin: 12mm;
+}
+
 @media print {
-  body * {
-    visibility: hidden;
+  body.is-printing-autogiro {
+    background: #fff !important;
   }
 
-  #autogiro-preview,
-  #autogiro-preview * {
-    visibility: visible;
+  body.is-printing-autogiro header,
+  body.is-printing-autogiro footer,
+  body.is-printing-autogiro .top-bar,
+  body.is-printing-autogiro .page-title,
+  body.is-printing-autogiro .sikf-swish-section,
+  body.is-printing-autogiro .donation-methods,
+  body.is-printing-autogiro .donor-copy,
+  body.is-printing-autogiro .flow-progress,
+  body.is-printing-autogiro .donor-step:not([data-step="5"]),
+  body.is-printing-autogiro .flow-actions,
+  body.is-printing-autogiro .cancel-payment,
+  body.is-printing-autogiro .sikf-form-feedback {
+    display: none !important;
   }
 
-  #autogiro-preview {
+  body.is-printing-autogiro .container,
+  body.is-printing-autogiro .row,
+  body.is-printing-autogiro .col-md-7,
+  body.is-printing-autogiro .monthly-donor-page,
+  body.is-printing-autogiro .donor-flow,
+  body.is-printing-autogiro .donor-step[data-step="5"] {
+    display: block !important;
+    float: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+
+  body.is-printing-autogiro .signature-clear {
+    display: none !important;
+  }
+
+  body.is-printing-autogiro #autogiro-preview {
     border: 0;
-    left: 0;
     margin: 0;
     padding: 0;
-    position: absolute;
-    top: 0;
     width: 100%;
   }
 }

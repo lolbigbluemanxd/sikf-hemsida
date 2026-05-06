@@ -200,7 +200,6 @@ $city = clean_string($_POST['city'] ?? '', 80);
 $paymentMethod = clean_string($_POST['payment_method'] ?? '', 80);
 $bank = clean_string($_POST['bank'] ?? '', 80);
 $bankAccount = clean_string($_POST['bank_account'] ?? '', 80);
-$payerCustomerNumber = clean_string($_POST['payer_customer_number'] ?? '', 80);
 $signaturePlaceDate = clean_string($_POST['signature_place_date'] ?? '', 120);
 $amountRaw = clean_string($_POST['amount'] ?? '', 12);
 $amount = filter_var($amountRaw, FILTER_VALIDATE_INT, [
@@ -244,7 +243,6 @@ $bodyLines = [
     'Betalsätt: ' . $paymentMethod,
     'Bank: ' . $bank,
     'Clearing/konto: ' . $bankAccount,
-    'Betalar-/kundnummer: ' . $payerCustomerNumber,
     'Ort och datum: ' . $signaturePlaceDate,
     'Ämne: ' . $subject,
     '',

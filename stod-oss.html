@@ -45,6 +45,7 @@
 <input type="hidden" name="subject" value="Bli månadsgivare">
 <input type="hidden" name="message" id="support-message" value="">
 <input type="hidden" name="amount" id="amount-input" value="150">
+<input type="hidden" name="signature_data" id="signature-data" value="">
 
 <div class="flow-progress" aria-label="Steg">
 <span class="active" data-progress="1">1</span>
@@ -125,7 +126,6 @@
 <p>Fyll i bankuppgifterna så skapas en autogiroblankett som kan skrivas ut, undertecknas och lämnas till SIKF.</p>
 <div class="form-group"><label>Välj din bank *</label><select name="bank" class="form-control" required><option value="">Välj bank</option><option>Handelsbanken</option><option>Nordea</option><option>ICA Banken</option><option>Länsförsäkringar</option><option>SBAB</option><option>SEB</option><option>Skandia</option><option>Danske Bank</option><option>Swedbank</option><option>Swedbank Sparbankerna</option><option>Sparbanken Syd</option><option>Annan bank</option></select></div>
 <div class="form-group"><label>Clearingnummer + kontonummer *</label><input type="text" name="bank_account" class="form-control" placeholder="Exempel: 1234-567890123" required></div>
-<div class="form-group"><label>Betalar-/kundnummer</label><input type="text" name="payer_customer_number" class="form-control" placeholder="Valfritt"></div>
 <div class="form-group"><label>Ort och datum *</label><input type="text" name="signature_place_date" class="form-control" placeholder="Trollhättan, dagens datum" required></div>
 </div>
 <div class="flow-actions">
@@ -157,7 +157,6 @@
 <p>Person-/organisationsnummer: <span data-ag="personal"></span></p>
 <p>Betaltjänstleverantör: <span data-ag="bank"></span></p>
 <p>Konto: <span data-ag="account"></span></p>
-<p>Betalar-/kundnummer: <span data-ag="customer"></span></p>
 </div>
 </div>
 <div class="autogiro-box autogiro-full">
@@ -167,7 +166,7 @@
 </div>
 <div class="autogiro-signature">
 <div><span>Ort och datum</span><strong data-ag="placeDate"></strong></div>
-<div><span>Betalarens underskrift</span><strong>&nbsp;</strong></div>
+<div class="signature-box"><span>Betalarens underskrift</span><canvas id="signature-canvas" aria-label="Skriv din underskrift här"></canvas><button type="button" class="signature-clear">Rensa</button></div>
 </div>
 </div>
 <div class="flow-actions final-actions">
@@ -255,9 +254,13 @@
     personal: form.querySelector('[data-ag="personal"]'),
     bank: form.querySelector('[data-ag="bank"]'),
     account: form.querySelector('[data-ag="account"]'),
-    customer: form.querySelector('[data-ag="customer"]'),
     placeDate: form.querySelector('[data-ag="placeDate"]')
   };
+  var signatureCanvas = document.getElementById('signature-canvas');
+  var signatureInput = document.getElementById('signature-data');
+  var signatureClear = form.querySelector('.signature-clear');
+  var signatureHasInk = false;
+  var resizeSignatureCanvas = function () {};
 
   function showStep(step) {
     currentStep = step;
@@ -268,6 +271,9 @@
       dot.classList.toggle('active', Number(dot.getAttribute('data-progress')) <= step);
     });
     updateSummary();
+    if (step === 5) {
+      setTimeout(resizeSignatureCanvas, 50);
+    }
     try {
       form.dispatchEvent(new CustomEvent('sikf:donor-step', { detail: { step: step } }));
     } catch (e) {}
@@ -327,7 +333,6 @@
     setAg('personal', formValue('personal_number'));
     setAg('bank', formValue('bank'));
     setAg('account', formValue('bank_account'));
-    setAg('customer', formValue('payer_customer_number'));
     setAg('placeDate', formValue('signature_place_date'));
 
     document.getElementById('support-message').value =
@@ -340,8 +345,127 @@
       'Betalsätt: ' + (form.elements.payment_method.value || '') + '\n' +
       'Bank: ' + formValue('bank') + '\n' +
       'Clearing/konto: ' + formValue('bank_account') + '\n' +
-      'Betalar-/kundnummer: ' + formValue('payer_customer_number') + '\n' +
       'Ort och datum: ' + formValue('signature_place_date');
+  }
+
+  function setupSignaturePad() {
+    if (!signatureCanvas) return;
+    var ctx = signatureCanvas.getContext('2d');
+    var drawing = false;
+
+    function resizeCanvas() {
+      var oldSignature = signatureHasInk ? signatureCanvas.toDataURL('image/png') : '';
+      var rect = signatureCanvas.getBoundingClientRect();
+      var ratio = window.devicePixelRatio || 1;
+      signatureCanvas.width = Math.max(1, Math.floor(rect.width * ratio));
+      signatureCanvas.height = Math.max(1, Math.floor(rect.height * ratio));
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.lineWidth = 2.4;
+      ctx.strokeStyle = '#111';
+      if (oldSignature) {
+        var img = new Image();
+        img.onload = function () { ctx.drawImage(img, 0, 0, rect.width, rect.height); };
+        img.src = oldSignature;
+      }
+    }
+
+    function point(event) {
+      var rect = signatureCanvas.getBoundingClientRect();
+      var touch = event.touches && event.touches[0] ? event.touches[0] : event;
+      return {
+        x: touch.clientX - rect.left,
+        y: touch.clientY - rect.top
+      };
+    }
+
+    function start(event) {
+      event.preventDefault();
+      drawing = true;
+      var p = point(event);
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y);
+    }
+
+    function move(event) {
+      if (!drawing) return;
+      event.preventDefault();
+      var p = point(event);
+      ctx.lineTo(p.x, p.y);
+      ctx.stroke();
+      signatureHasInk = true;
+      if (signatureInput) signatureInput.value = signatureCanvas.toDataURL('image/png');
+    }
+
+    function end() {
+      if (!drawing) return;
+      drawing = false;
+      if (signatureHasInk && signatureInput) signatureInput.value = signatureCanvas.toDataURL('image/png');
+    }
+
+    resizeCanvas();
+    resizeSignatureCanvas = resizeCanvas;
+    window.addEventListener('resize', resizeCanvas);
+    signatureCanvas.addEventListener('mousedown', start);
+    signatureCanvas.addEventListener('mousemove', move);
+    window.addEventListener('mouseup', end);
+    signatureCanvas.addEventListener('touchstart', start, { passive: false });
+    signatureCanvas.addEventListener('touchmove', move, { passive: false });
+    signatureCanvas.addEventListener('touchend', end);
+
+    if (signatureClear) {
+      signatureClear.addEventListener('click', function () {
+        ctx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+        signatureHasInk = false;
+        if (signatureInput) signatureInput.value = '';
+      });
+    }
+  }
+
+  function printableHtml() {
+    var clone = document.getElementById('autogiro-preview').cloneNode(true);
+    var canvas = clone.querySelector('#signature-canvas');
+    if (canvas) {
+      var replacement;
+      if (signatureHasInk && signatureCanvas) {
+        replacement = document.createElement('img');
+        replacement.src = signatureCanvas.toDataURL('image/png');
+        replacement.alt = 'Betalarens underskrift';
+        replacement.className = 'signature-print-image';
+      } else {
+        replacement = document.createElement('div');
+        replacement.className = 'signature-print-empty';
+      }
+      canvas.parentNode.replaceChild(replacement, canvas);
+    }
+    var clear = clone.querySelector('.signature-clear');
+    if (clear) clear.parentNode.removeChild(clear);
+    return '<!doctype html><html lang="sv"><head><meta charset="utf-8"><title>Autogiroanmälan SIKF</title><style>' +
+      '@page{size:A4 portrait;margin:12mm}*{box-sizing:border-box}body{font-family:Arial,sans-serif;color:#111;margin:0}.autogiro-preview{border:0;margin:0;padding:0}.autogiro-head{border-bottom:2px solid #111;margin-bottom:10px;padding-bottom:8px}.autogiro-head strong{display:block;font-size:22px;font-weight:900}.autogiro-head span{display:block;font-size:16px;font-weight:800}.autogiro-grid{display:grid;gap:10px;grid-template-columns:1fr 1fr}.autogiro-box{border:1px solid #222;padding:10px;break-inside:avoid}.autogiro-box h4{font-size:15px;margin:0 0 8px}.autogiro-box p{border-bottom:1px solid #bbb;font-size:12px;line-height:1.25;margin:0 0 6px;min-height:20px;padding-bottom:4px}.autogiro-full{margin-top:10px}.autogiro-full p{border-bottom:0;font-size:12px;line-height:1.35}.autogiro-signature{display:grid;gap:10px;grid-template-columns:1fr 1fr;margin-top:10px}.autogiro-signature div{border:1px solid #222;min-height:72px;padding:8px}.autogiro-signature span{display:block;font-size:12px;font-weight:800;margin-bottom:8px}.signature-clear{display:none}.signature-print-image,.signature-print-empty{display:block;height:44px;width:100%;object-fit:contain;object-position:left bottom}' +
+      '</style></head><body>' + clone.outerHTML + '</body></html>';
+  }
+
+  function printAutogiro() {
+    updateSummary();
+    if (signatureHasInk && signatureInput && signatureCanvas) {
+      signatureInput.value = signatureCanvas.toDataURL('image/png');
+    }
+    var printWindow = window.open('', '_blank', 'width=900,height=700');
+    if (!printWindow) {
+      document.body.classList.add('is-printing-autogiro');
+      window.print();
+      setTimeout(function () { document.body.classList.remove('is-printing-autogiro'); }, 1000);
+      return;
+    }
+    printWindow.document.open();
+    printWindow.document.write(printableHtml());
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(function () {
+      printWindow.print();
+      printWindow.close();
+    }, 300);
   }
 
   Array.prototype.forEach.call(form.querySelectorAll('.amount-choice'), function (button) {
@@ -411,14 +535,19 @@
   var printButton = form.querySelector('.print-autogiro');
   if (printButton) {
     printButton.addEventListener('click', function () {
-      updateSummary();
-      window.print();
+      printAutogiro();
     });
+  }
+
+  var submitButton = form.querySelector('button[type="submit"]');
+  if (submitButton && window.location.hostname.indexOf('github.io') !== -1) {
+    submitButton.style.display = 'none';
   }
 
   form.addEventListener('input', updateSummary);
   form.addEventListener('submit', updateSummary);
   updateAmount(150);
+  setupSignaturePad();
 })();
 </script>
 </body>
