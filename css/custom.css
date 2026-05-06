@@ -663,6 +663,26 @@ a,
   min-height: 420px;
 }
 
+.contact-map {
+  overflow: hidden;
+  padding: 0;
+}
+
+.contact-map iframe {
+  border: 0;
+  display: block;
+  height: 330px;
+  width: 100%;
+}
+
+.map-info {
+  padding: 24px 28px 28px;
+}
+
+.map-info h3 {
+  margin-top: 0;
+}
+
 .contact-form .form-control {
   border: 2px solid #a8beb3;
   box-shadow: inset 0 1px 2px rgba(17, 76, 55, 0.04);
