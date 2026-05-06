@@ -269,7 +269,7 @@
 <script src="js/bootstrap.min.js"></script>
 <script src="js/qrcode.min.js"></script>
 <script src="js/sikf-swish.js"></script>
-<script src="js/sikf-forms.js?v=20260506-3"></script>
+<script src="js/sikf-forms.js?v=20260506-4"></script>
 <script src="js/vendor/html2canvas.min.js"></script>
 <script src="js/vendor/jspdf.umd.min.js"></script>
 <script>
@@ -541,7 +541,6 @@
     if (logo) {
       logo.src = new URL(logo.getAttribute('src'), window.location.href).toString();
     }
-    replaceExportLogo(clone);
     var unsigned = clone.querySelector('[data-signature-status]');
     if (unsigned && signatureImage) unsigned.parentNode.removeChild(unsigned);
     var previewImage = clone.querySelector('#signature-preview-image');
@@ -555,12 +554,6 @@
     if (open) open.parentNode.removeChild(open);
     clone.classList.add('pdf-export-form');
     return clone;
-  }
-
-  function replaceExportLogo(root) {
-    var wrap = root.querySelector('.bankgirot-logo');
-    if (!wrap) return;
-    wrap.innerHTML = '<span class="bankgirot-logo-text"><span>bg</span>bankgirot</span>';
   }
 
   function requireSignature() {
@@ -627,7 +620,6 @@
     var exportWrap = document.createElement('div');
     exportWrap.className = 'pdf-export-stage';
     var exportClone = prepareExportClone();
-    replaceExportLogo(exportClone);
     exportWrap.appendChild(exportClone);
     document.body.appendChild(exportWrap);
 
@@ -635,7 +627,7 @@
       backgroundColor: '#ffffff',
       allowTaint: true,
       scale: 1.65,
-      useCORS: false
+      useCORS: true
     }).then(function (canvas) {
       var pdf = new window.jspdf.jsPDF('p', 'mm', 'a4', true);
       var pageWidth = 210;
