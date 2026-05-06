@@ -1615,7 +1615,130 @@ body.is-exporting-autogiro .pdf-export-form .signature-preview {
 }
 
 #footer {
-  background: #18211e;
+  background: #111b17;
+  color: rgba(255, 255, 255, 0.82);
+  padding: 0;
+}
+
+.sikf-site-footer a {
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.sikf-site-footer a:hover,
+.sikf-site-footer a:focus {
+  color: #fff;
+}
+
+.sikf-footer-main {
+  border-top: 5px solid var(--sikf-green);
+  padding: 48px 0 36px;
+}
+
+.sikf-footer-logo {
+  align-items: center;
+  display: inline-flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.sikf-footer-logo img {
+  background: #fff;
+  border-radius: 50%;
+  height: 58px;
+  object-fit: contain;
+  padding: 4px;
+  width: 58px;
+}
+
+.sikf-footer-logo span {
+  color: #fff;
+  font-size: 26px;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.sikf-footer-brand p,
+.sikf-footer-support p {
+  line-height: 1.7;
+  margin-bottom: 16px;
+}
+
+.sikf-footer-main h3 {
+  color: #fff;
+  font-size: 17px;
+  font-weight: 800;
+  margin: 8px 0 18px;
+}
+
+.sikf-footer-main ul,
+.sikf-footer-mini {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sikf-footer-main ul > li {
+  display: block;
+  margin-left: 0;
+}
+
+.sikf-footer-links li,
+.sikf-footer-support li {
+  margin-bottom: 10px;
+}
+
+.sikf-footer-contact li {
+  align-items: flex-start;
+  display: flex;
+  gap: 10px;
+  line-height: 1.5;
+  margin-bottom: 13px;
+}
+
+.sikf-footer-contact i {
+  color: var(--sikf-green-light);
+  margin-top: 3px;
+  width: 16px;
+}
+
+.sikf-footer-social a {
+  align-items: center;
+  background: var(--sikf-green);
+  border-radius: 50%;
+  display: inline-flex;
+  height: 38px;
+  justify-content: center;
+  width: 38px;
+}
+
+.sikf-footer-social a:hover,
+.sikf-footer-social a:focus {
+  background: var(--sikf-green-dark);
+}
+
+.sikf-footer-support strong {
+  color: #fff;
+}
+
+.sikf-footer-support .btn {
+  margin-top: 6px;
+}
+
+.sikf-footer-bottom {
+  background: #0d1512;
+  color: rgba(255, 255, 255, 0.72);
+  padding: 18px 0;
+}
+
+.sikf-footer-mini {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  justify-content: flex-end;
+}
+
+.sikf-footer-mini > li {
+  margin-left: 0;
 }
 
 @media (max-width: 767px) {
@@ -1667,6 +1790,19 @@ body.is-exporting-autogiro .pdf-export-form .signature-preview {
   .top-bar,
   .social {
     text-align: left;
+  }
+
+  .sikf-footer-main {
+    padding: 34px 0 22px;
+  }
+
+  .sikf-footer-main .col-sm-6 {
+    margin-bottom: 26px;
+  }
+
+  .sikf-footer-mini {
+    justify-content: flex-start;
+    margin-top: 10px;
   }
 
   .donor-flow {
