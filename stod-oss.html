@@ -190,8 +190,7 @@
 <button type="button" class="flow-back btn btn-default">Tillbaka</button>
 <button type="button" class="btn btn-default print-autogiro">Skriv ut blankett</button>
 <button type="button" class="btn btn-default download-autogiro">Ladda ner PDF</button>
-<button type="button" class="btn btn-primary email-autogiro">Skicka via e-post</button>
-<button type="submit" class="btn btn-primary submit-autogiro">Skicka ifylld PDF</button>
+<button type="submit" class="btn btn-primary email-autogiro submit-autogiro">Skicka via e-post</button>
 </div>
 <p class="bg-official-link"><a href="docs/bankgirot-autogiro-medgivande-till-kontonummer.pdf" target="_blank" rel="noopener">Öppna Bankgirots originalblankett</a></p>
 <a class="cancel-payment" href="stod-oss.html">Avbryt anmälan</a>
@@ -695,27 +694,6 @@
     });
   }
 
-  function emailAutogiro() {
-    downloadAutogiro().then(function (downloaded) {
-      if (!downloaded) return;
-    var fullName = [formValue('first_name'), formValue('last_name')].filter(Boolean).join(' ');
-    var body = [
-      'Assalamu alaykum SIKF,',
-      '',
-      'Jag vill skicka in min autogiroanmälan.',
-      '',
-      'Namn: ' + fullName,
-      'Personnummer: ' + formValue('personal_number'),
-      'Belopp: ' + amount + ' kr/månad',
-      'Bank: ' + formValue('bank'),
-      '',
-      'Jag bifogar den signerade PDF-blanketten som laddades ner från hemsidan.',
-      ''
-    ].join('\n');
-    window.location.href = 'mailto:Mussamahad@gmail.com?subject=' + encodeURIComponent('Autogiroanmälan SIKF - ' + fullName) + '&body=' + encodeURIComponent(body);
-    });
-  }
-
   Array.prototype.forEach.call(form.querySelectorAll('.amount-choice'), function (button) {
     button.addEventListener('click', function () {
       Array.prototype.forEach.call(form.querySelectorAll('.amount-choice'), function (item) { item.classList.remove('active'); });
@@ -799,13 +777,10 @@
   var downloadButton = form.querySelector('.download-autogiro');
   if (downloadButton) downloadButton.addEventListener('click', downloadAutogiro);
 
-  var emailButton = form.querySelector('.email-autogiro');
-  if (emailButton) emailButton.addEventListener('click', emailAutogiro);
-
   form.sikfBeforeSubmit = prepareAutogiroSubmit;
 
   var submitButton = form.querySelector('button[type="submit"]');
-  if (submitButton && (window.location.hostname.indexOf('github.io') !== -1 || window.location.protocol === 'file:')) {
+  if (submitButton && window.location.hostname.indexOf('github.io') !== -1) {
     submitButton.style.display = 'none';
   }
 
