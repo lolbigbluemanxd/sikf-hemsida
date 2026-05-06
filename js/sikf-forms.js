@@ -145,9 +145,20 @@
           });
         })
         .then(function (response) {
-          return response.json().catch(function () {
-            return { success: false, message: 'Servern svarade inte med giltig JSON.' };
-          }).then(function (data) {
+          return response.text().then(function (text) {
+            var data = null;
+            try {
+              data = JSON.parse(text);
+            } catch (e) {
+              var lower = text.toLowerCase();
+              if (lower.indexOf('post content-length') !== -1 || lower.indexOf('exceeds the limit') !== -1) {
+                data = { success: false, message: 'PDF-filen blev för stor för den lokala PHP-servern. Försök igen efter att sidan laddats om.' };
+              } else if (lower.indexOf('failed to connect to mailserver') !== -1) {
+                data = { success: false, message: 'PHP kan inte skicka e-post lokalt utan SMTP/webbhotell.' };
+              } else {
+                data = { success: false, message: 'Servern svarade inte med giltig JSON. Ladda om sidan och försök igen.' };
+              }
+            }
             if (!response.ok && data && !data.message) {
               data.message = 'Serverfel (' + response.status + ').';
             }

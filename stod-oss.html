@@ -269,7 +269,7 @@
 <script src="js/bootstrap.min.js"></script>
 <script src="js/qrcode.min.js"></script>
 <script src="js/sikf-swish.js"></script>
-<script src="js/sikf-forms.js"></script>
+<script src="js/sikf-forms.js?v=20260506-2"></script>
 <script src="js/vendor/html2canvas.min.js"></script>
 <script src="js/vendor/jspdf.umd.min.js"></script>
 <script>
@@ -634,10 +634,10 @@
     return window.html2canvas(exportClone, {
       backgroundColor: '#ffffff',
       allowTaint: true,
-      scale: 2.4,
+      scale: 1.65,
       useCORS: false
     }).then(function (canvas) {
-      var pdf = new window.jspdf.jsPDF('p', 'mm', 'a4');
+      var pdf = new window.jspdf.jsPDF('p', 'mm', 'a4', true);
       var pageWidth = 210;
       var pageHeight = 297;
       var imgWidth = pageWidth - 18;
@@ -649,7 +649,8 @@
         imgWidth = canvas.width * imgHeight / canvas.height;
         x = (pageWidth - imgWidth) / 2;
       }
-      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', x, y, imgWidth, imgHeight);
+      var imageData = canvas.toDataURL('image/jpeg', 0.86);
+      pdf.addImage(imageData, 'JPEG', x, y, imgWidth, imgHeight, undefined, 'MEDIUM');
       if (options.save) pdf.save(autogiroPdfFilename());
       return {
         ok: true,
