@@ -80,7 +80,7 @@
 </div>
 <button type="button" class="auto-fill-button">Fyll i automatiskt</button>
 </div>
-<p class="helper-note">Automatisk ifyllnad kräver senare koppling till BankID eller personuppgiftstjänst. Just nu fyller besökaren i manuellt.</p>
+<p class="helper-note">Uppgifterna används för att skapa en autogiroanmälan som SIKF kan hantera enligt föreningens bankrutin.</p>
 <div class="row compact-row">
 <div class="col-sm-6"><div class="form-group"><label>Förnamn *</label><input type="text" name="first_name" class="form-control" required></div></div>
 <div class="col-sm-6"><div class="form-group"><label>Efternamn *</label><input type="text" name="last_name" class="form-control" required></div></div>
@@ -119,54 +119,63 @@
 </section>
 
 <section class="donor-step" data-step="4">
-<h3>Sammanfattning</h3>
-<div class="summary-box">
-<p class="summary-title">Donera <strong><span data-summary-amount>150</span> kr i månaden</strong> till SIKF</p>
-<h4>Din information:</h4>
-<div id="donor-summary" class="donor-summary"></div>
-</div>
+<h3>4. Bankuppgifter</h3>
 <div class="bank-box">
-<h3>Betala med Autogiro</h3>
-<p>Välj bank om föreningen senare kopplar formuläret till en autogirotjänst. I nuläget skickas anmälan till SIKF.</p>
-<div class="form-group"><label>Välj din bank</label><select name="bank" class="form-control"><option>Handelsbanken</option><option>Nordea</option><option>ICA Banken</option><option>Länsförsäkringar</option><option>SBAB</option><option>SEB</option><option>Skandia</option><option>Danske Bank</option><option>Swedbank</option><option>Swedbank Sparbankerna</option><option>Sparbanken Syd</option><option>Annan bank</option></select></div>
-<button type="button" class="flow-next btn btn-primary btn-block btn-lg">Hämta uppgifter</button>
+<h3>Autogiroanmälan</h3>
+<p>Fyll i bankuppgifterna så skapas en autogiroblankett som kan skrivas ut, undertecknas och lämnas till SIKF.</p>
+<div class="form-group"><label>Välj din bank *</label><select name="bank" class="form-control" required><option value="">Välj bank</option><option>Handelsbanken</option><option>Nordea</option><option>ICA Banken</option><option>Länsförsäkringar</option><option>SBAB</option><option>SEB</option><option>Skandia</option><option>Danske Bank</option><option>Swedbank</option><option>Swedbank Sparbankerna</option><option>Sparbanken Syd</option><option>Annan bank</option></select></div>
+<div class="form-group"><label>Clearingnummer + kontonummer *</label><input type="text" name="bank_account" class="form-control" placeholder="Exempel: 1234-567890123" required></div>
+<div class="form-group"><label>Betalar-/kundnummer</label><input type="text" name="payer_customer_number" class="form-control" placeholder="Valfritt"></div>
+<div class="form-group"><label>Ort och datum *</label><input type="text" name="signature_place_date" class="form-control" placeholder="Trollhättan, dagens datum" required></div>
 </div>
-<div class="flow-actions final-actions">
+<div class="flow-actions">
 <button type="button" class="flow-back btn btn-default">Tillbaka</button>
+<button type="button" class="flow-next btn btn-primary">Skapa blankett</button>
 </div>
 </section>
 
 <section class="donor-step" data-step="5">
-<div class="bankid-panel" data-bankid-panel data-bankid-state="idle">
-<h3>Betala med Autogiro</h3>
-<hr>
-<div class="bankid-sign">
-<h4 data-bankid-title>BankID-förberedelse</h4>
-<p data-bankid-message>Klicka på starta BankID. Om BankID-avtal inte är aktiverat ännu kan du ändå skicka anmälan till SIKF.</p>
-<div class="qr-placeholder" aria-label="BankID QR-kod, förberedd plats">
-<svg viewBox="0 0 210 210" role="img" aria-hidden="true">
-<rect width="210" height="210" fill="#fff"/>
-<rect x="10" y="10" width="50" height="50" fill="#000"/><rect x="20" y="20" width="30" height="30" fill="#fff"/><rect x="28" y="28" width="14" height="14" fill="#000"/>
-<rect x="150" y="10" width="50" height="50" fill="#000"/><rect x="160" y="20" width="30" height="30" fill="#fff"/><rect x="168" y="28" width="14" height="14" fill="#000"/>
-<rect x="10" y="150" width="50" height="50" fill="#000"/><rect x="20" y="160" width="30" height="30" fill="#fff"/><rect x="28" y="168" width="14" height="14" fill="#000"/>
-<path d="M75 12h12v12H75zm24 0h12v24H99zm24 0h12v12h-12zM75 42h36v12H75zm48 12h12v24h-12zM75 72h12v24H75zm24 0h36v12H99zm48 0h12v12h-12zm-60 36h12v12H87zm24-12h12v36h-12zm36 0h24v12h-24zm36 12h12v24h-12zM72 132h24v12H72zm36 12h12v12h-12zm24-24h12v36h-12zm24 24h36v12h-36zm-84 24h12v24H72zm24 0h36v12H96zm48 0h12v12h-12zm24 12h12v12h-12zm24-36h12v48h-12zM72 192h36v12H72zm48-12h12v24h-12zm24 12h24v12h-24z" fill="#000"/>
-<path d="M90 30h12v12H90zm48 12h12v12h-12zM66 66h12v12H66zm84 24h24v12h-24zm-72 24h12v12H78zm84 0h12v12h-12zm-60 54h12v12h-12zm48-108h12v12h-12z" fill="#000"/>
-</svg>
-<div class="bankid-qr-overlay">
-<strong>BankID</strong>
-<span>QR aktiveras när leverantör är kopplad</span>
+<h3>5. Autogiroblankett</h3>
+<p class="helper-note">Skriv ut blanketten, låt betalaren skriva under och lämna den till SIKF. Föreningen skickar sedan underlaget vidare enligt bankens rutin.</p>
+<div class="autogiro-preview" id="autogiro-preview">
+<div class="autogiro-head">
+<strong>Autogiroanmälan</strong>
+<span>Medgivande till kontonummer</span>
+</div>
+<div class="autogiro-grid">
+<div class="autogiro-box">
+<h4>Betalningsmottagare</h4>
+<p><strong>Somaliska Islamiska Kultur Förening</strong></p>
+<p>Lantmannavägen 42<br>461 60 Trollhättan</p>
+<p>Organisationsnummer: 8024707211</p>
+<p>Bankgiro: 166-6221</p>
+</div>
+<div class="autogiro-box">
+<h4>Betalare</h4>
+<p>Namn: <span data-ag="name"></span></p>
+<p>Adress: <span data-ag="address"></span></p>
+<p>Person-/organisationsnummer: <span data-ag="personal"></span></p>
+<p>Betaltjänstleverantör: <span data-ag="bank"></span></p>
+<p>Konto: <span data-ag="account"></span></p>
+<p>Betalar-/kundnummer: <span data-ag="customer"></span></p>
 </div>
 </div>
-<div class="bankid-loading"><span></span></div>
-<button type="button" class="btn btn-default bankid-start" data-bankid-start>Starta BankID</button>
-<p class="bankid-note">Förberedd för riktig BankID/Autogiro-koppling. När SIKF får API-uppgifter från bank eller leverantör läggs de i config.php och detta steg kan starta en riktig signering.</p>
+<div class="autogiro-box autogiro-full">
+<h4>Medgivande via Autogiro</h4>
+<p>Betalaren medger att betalning får göras genom uttag från angivet konto på begäran av Somaliska Islamiska Kultur Förening. Månadsgåva: <strong><span data-summary-amount>150</span> kr/månad</strong>.</p>
+<p>Betalaren samtycker till att nödvändiga person- och betalningsuppgifter behandlas för administration av autogirotjänsten.</p>
+</div>
+<div class="autogiro-signature">
+<div><span>Ort och datum</span><strong data-ag="placeDate"></strong></div>
+<div><span>Betalarens underskrift</span><strong>&nbsp;</strong></div>
+</div>
 </div>
 <div class="flow-actions final-actions">
 <button type="button" class="flow-back btn btn-default">Tillbaka</button>
+<button type="button" class="btn btn-default print-autogiro">Skriv ut blankett</button>
 <button type="submit" class="btn btn-primary">Skicka anmälan till SIKF</button>
 </div>
-<a class="cancel-payment" href="stod-oss.html">Avbryt betalning</a>
-</div>
+<a class="cancel-payment" href="stod-oss.html">Avbryt anmälan</a>
 </section>
 </form>
 </div>
@@ -230,7 +239,6 @@
 <script src="js/qrcode.min.js"></script>
 <script src="js/sikf-swish.js"></script>
 <script src="js/sikf-forms.js"></script>
-<script src="js/sikf-bankid.js"></script>
 <script>
 (function () {
   var form = document.getElementById('donor-flow');
@@ -241,6 +249,15 @@
   var amountInput = document.getElementById('amount-input');
   var customWrap = form.querySelector('.custom-amount-wrap');
   var customAmount = document.getElementById('custom-amount');
+  var autogiroFields = {
+    name: form.querySelector('[data-ag="name"]'),
+    address: form.querySelector('[data-ag="address"]'),
+    personal: form.querySelector('[data-ag="personal"]'),
+    bank: form.querySelector('[data-ag="bank"]'),
+    account: form.querySelector('[data-ag="account"]'),
+    customer: form.querySelector('[data-ag="customer"]'),
+    placeDate: form.querySelector('[data-ag="placeDate"]')
+  };
 
   function showStep(step) {
     currentStep = step;
@@ -285,18 +302,33 @@
     });
   }
 
+  function setAg(name, value) {
+    if (autogiroFields[name]) autogiroFields[name].textContent = value || '—';
+  }
+
   function updateSummary() {
     var fullName = [formValue('first_name'), formValue('last_name')].filter(Boolean).join(' ');
+    var addressLine = [formValue('address'), [formValue('postal_code'), formValue('city')].filter(Boolean).join(' ')].filter(Boolean).join(', ');
     var lines = [
       fullName,
       formValue('personal_number'),
       formValue('address'),
       [formValue('postal_code'), formValue('city')].filter(Boolean).join(' '),
       formValue('email'),
-      formValue('phone')
+      formValue('phone'),
+      formValue('bank'),
+      formValue('bank_account')
     ].filter(Boolean);
     var summary = document.getElementById('donor-summary');
-    renderSummary(summary, lines);
+    if (summary) renderSummary(summary, lines);
+
+    setAg('name', fullName);
+    setAg('address', addressLine);
+    setAg('personal', formValue('personal_number'));
+    setAg('bank', formValue('bank'));
+    setAg('account', formValue('bank_account'));
+    setAg('customer', formValue('payer_customer_number'));
+    setAg('placeDate', formValue('signature_place_date'));
 
     document.getElementById('support-message').value =
       'Belopp: ' + amount + ' kr/månad\n' +
@@ -306,7 +338,10 @@
       'Postnummer/stad: ' + [formValue('postal_code'), formValue('city')].filter(Boolean).join(' ') + '\n' +
       'Telefon: ' + formValue('phone') + '\n' +
       'Betalsätt: ' + (form.elements.payment_method.value || '') + '\n' +
-      'Bank: ' + formValue('bank');
+      'Bank: ' + formValue('bank') + '\n' +
+      'Clearing/konto: ' + formValue('bank_account') + '\n' +
+      'Betalar-/kundnummer: ' + formValue('payer_customer_number') + '\n' +
+      'Ort och datum: ' + formValue('signature_place_date');
   }
 
   Array.prototype.forEach.call(form.querySelectorAll('.amount-choice'), function (button) {
@@ -347,8 +382,16 @@
         alert('Fyll i förnamn, efternamn och e-post.');
         return;
       }
+      if (currentStep === 2 && !formValue('personal_number')) {
+        alert('Fyll i personnummer. Det behövs för autogiroblanketten.');
+        return;
+      }
       if (currentStep === 3 && !form.elements.consent.checked) {
         alert('Du behöver godkänna att föreningen kontaktar dig.');
+        return;
+      }
+      if (currentStep === 4 && (!formValue('bank') || !formValue('bank_account') || !formValue('signature_place_date'))) {
+        alert('Fyll i bank, clearing/kontonummer samt ort och datum.');
         return;
       }
       showStep(Math.min(currentStep + 1, 5));
@@ -362,8 +405,16 @@
   });
 
   form.querySelector('.auto-fill-button').addEventListener('click', function () {
-    alert('Automatisk ifyllnad kan kopplas in senare via BankID eller en personuppgiftstjänst. Fyll i uppgifterna manuellt just nu.');
+    alert('Automatisk ifyllnad kan kopplas in senare. Fyll i uppgifterna manuellt just nu.');
   });
+
+  var printButton = form.querySelector('.print-autogiro');
+  if (printButton) {
+    printButton.addEventListener('click', function () {
+      updateSummary();
+      window.print();
+    });
+  }
 
   form.addEventListener('input', updateSummary);
   form.addEventListener('submit', updateSummary);

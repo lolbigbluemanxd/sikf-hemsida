@@ -199,6 +199,9 @@ $postalCode = clean_string($_POST['postal_code'] ?? '', 20);
 $city = clean_string($_POST['city'] ?? '', 80);
 $paymentMethod = clean_string($_POST['payment_method'] ?? '', 80);
 $bank = clean_string($_POST['bank'] ?? '', 80);
+$bankAccount = clean_string($_POST['bank_account'] ?? '', 80);
+$payerCustomerNumber = clean_string($_POST['payer_customer_number'] ?? '', 80);
+$signaturePlaceDate = clean_string($_POST['signature_place_date'] ?? '', 120);
 $amountRaw = clean_string($_POST['amount'] ?? '', 12);
 $amount = filter_var($amountRaw, FILTER_VALIDATE_INT, [
     'options' => ['min_range' => 1, 'max_range' => 50000],
@@ -216,6 +219,9 @@ if ($isDonor) {
     }
     if ($personalNumber !== '' && !preg_match('/^[0-9]{6,8}[-+]?[0-9]{4}$/', $personalNumber)) {
         json_response(false, 'Personnummer har fel format.', 422);
+    }
+    if ($bank === '' || $bankAccount === '' || $signaturePlaceDate === '') {
+        json_response(false, 'Fyll i bankuppgifter och ort/datum för autogiroanmälan.', 422);
     }
 } else {
     if ($name === '' || $subject === '' || $message === '') {
@@ -237,6 +243,9 @@ $bodyLines = [
     'Belopp: ' . ($amount !== false ? $amount . ' kr/månad' : ''),
     'Betalsätt: ' . $paymentMethod,
     'Bank: ' . $bank,
+    'Clearing/konto: ' . $bankAccount,
+    'Betalar-/kundnummer: ' . $payerCustomerNumber,
+    'Ort och datum: ' . $signaturePlaceDate,
     'Ämne: ' . $subject,
     '',
     'Meddelande:',

@@ -1164,6 +1164,94 @@ a,
   font-size: 14px !important;
 }
 
+.autogiro-preview {
+  background: #fff;
+  border: 2px solid #d4ded8;
+  color: #111;
+  margin-bottom: 22px;
+  padding: 28px;
+}
+
+.autogiro-head {
+  align-items: flex-start;
+  border-bottom: 2px solid #111;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+}
+
+.autogiro-head strong {
+  color: #8e1d3d;
+  font-size: 28px;
+  font-weight: 900;
+}
+
+.autogiro-head span {
+  font-size: 22px;
+  font-weight: 800;
+  text-align: right;
+}
+
+.autogiro-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: 1fr 1fr;
+}
+
+.autogiro-box {
+  border: 1px solid #222;
+  padding: 16px;
+}
+
+.autogiro-box h4 {
+  color: #111;
+  font-size: 18px;
+  font-weight: 900;
+  margin: 0 0 12px;
+}
+
+.autogiro-box p {
+  border-bottom: 1px solid #bbb;
+  margin: 0 0 9px;
+  min-height: 26px;
+  padding-bottom: 6px;
+}
+
+.autogiro-full {
+  margin-top: 18px;
+}
+
+.autogiro-full p {
+  border-bottom: 0;
+  line-height: 1.45;
+}
+
+.autogiro-signature {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: 1fr 1fr;
+  margin-top: 18px;
+}
+
+.autogiro-signature div {
+  border: 1px solid #222;
+  min-height: 78px;
+  padding: 10px 12px;
+}
+
+.autogiro-signature span {
+  display: block;
+  font-weight: 800;
+  margin-bottom: 18px;
+}
+
+.print-autogiro {
+  border-color: var(--sikf-green);
+  color: var(--sikf-green);
+  font-weight: 800;
+}
+
 .cancel-payment {
   color: #111;
   display: inline-block;
@@ -1262,6 +1350,23 @@ a,
     grid-template-columns: 1fr;
   }
 
+  .autogiro-head,
+  .autogiro-grid,
+  .autogiro-signature {
+    display: block;
+  }
+
+  .autogiro-head span {
+    display: block;
+    margin-top: 8px;
+    text-align: left;
+  }
+
+  .autogiro-box,
+  .autogiro-signature div {
+    margin-bottom: 14px;
+  }
+
   .flow-actions {
     display: block;
   }
@@ -1269,6 +1374,27 @@ a,
   .flow-actions .btn {
     display: block;
     margin-bottom: 10px;
+    width: 100%;
+  }
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  #autogiro-preview,
+  #autogiro-preview * {
+    visibility: visible;
+  }
+
+  #autogiro-preview {
+    border: 0;
+    left: 0;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    top: 0;
     width: 100%;
   }
 }
