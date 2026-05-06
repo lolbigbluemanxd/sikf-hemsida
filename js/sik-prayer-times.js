@@ -1,5 +1,5 @@
 /*
- * SIKF prayer times widget
+ * SIK prayer times widget
  * Fetches today's prayer times for Trollhättan from api.aladhan.com
  * and populates any element with [data-prayer="<Name>"] on the page.
  *
@@ -42,7 +42,7 @@
   }
 
   function showError() {
-    var err = document.getElementById('sikf-prayer-error');
+    var err = document.getElementById('sik-prayer-error');
     if (err) err.style.display = 'block';
     PRAYERS.forEach(function (p) {
       setText('[data-prayer="' + p + '"]', '—');
@@ -70,7 +70,7 @@
 
         var t = json.data.timings;
         if (window.console && console.info) {
-          console.info('SIKF bönetider (' + (json.data.meta && json.data.meta.method && json.data.meta.method.name) +
+          console.info('SIK bönetider (' + (json.data.meta && json.data.meta.method && json.data.meta.method.name) +
             ', high-lat=' + LAT_ADJUST + ', tune=' + TUNE + '):', t);
         }
         PRAYERS.forEach(function (p) {
@@ -78,7 +78,7 @@
           setText('[data-prayer="' + p + '"]', time || '—');
         });
 
-        var dateNode = document.getElementById('sikf-prayer-date');
+        var dateNode = document.getElementById('sik-prayer-date');
         if (dateNode && json.data.date) {
           var d = json.data.date;
           var hijri = d.hijri ?
@@ -88,7 +88,7 @@
       })
       .catch(function (err) {
         if (window.console && console.warn) {
-          console.warn('SIKF: kunde inte hämta bönetider:', err);
+          console.warn('SIK: kunde inte hämta bönetider:', err);
         }
         showError();
       });

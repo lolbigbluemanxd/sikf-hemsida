@@ -1,6 +1,6 @@
 /*
- * SIKF secure form handler.
- * Sends all <form data-sikf-form> submissions to the local PHP backend.
+ * SIK secure form handler.
+ * Sends all <form data-sik-form> submissions to the local PHP backend.
  */
 (function () {
   'use strict';
@@ -9,10 +9,10 @@
   var csrfPromise = null;
 
   function ensureFeedbackBox(form) {
-    var box = form.querySelector(':scope > .sikf-form-feedback');
+    var box = form.querySelector(':scope > .sik-form-feedback');
     if (!box) {
       box = document.createElement('div');
-      box.className = 'sikf-form-feedback';
+      box.className = 'sik-form-feedback';
       box.setAttribute('role', 'status');
       box.setAttribute('aria-live', 'polite');
       box.style.display = 'none';
@@ -23,7 +23,7 @@
 
   function showFeedback(form, type, msg) {
     var box = ensureFeedbackBox(form);
-    box.className = 'sikf-form-feedback sikf-form-feedback--' + type;
+    box.className = 'sik-form-feedback sik-form-feedback--' + type;
     box.textContent = msg;
     box.style.display = 'block';
     try { box.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
@@ -112,8 +112,8 @@
   }
 
   function attach(form) {
-    if (!form || form.dataset.sikfFormReady) return;
-    form.dataset.sikfFormReady = '1';
+    if (!form || form.dataset.sikReady) return;
+    form.dataset.sikReady = '1';
     form.setAttribute('action', ENDPOINT);
     form.setAttribute('method', 'POST');
     form.setAttribute('autocomplete', 'on');
@@ -131,8 +131,8 @@
       var btn = form.querySelector('button[type="submit"], input[type="submit"]');
       setButtonLoading(btn, true);
 
-      if (isStaticOnly() && typeof form.sikfStaticSubmit === 'function') {
-        Promise.resolve(form.sikfStaticSubmit())
+      if (isStaticOnly() && typeof form.sikStaticSubmit === 'function') {
+        Promise.resolve(form.sikStaticSubmit())
           .then(function (data) {
             showFeedback(form, 'success',
               (data && data.message) ? data.message : 'PDF-blanketten är sparad på din enhet.');
@@ -150,8 +150,8 @@
       getCsrfToken()
         .then(function (token) {
           ensureHidden(form, 'csrf_token', token);
-          if (typeof form.sikfBeforeSubmit === 'function') {
-            return Promise.resolve(form.sikfBeforeSubmit()).then(function () {
+          if (typeof form.sikBeforeSubmit === 'function') {
+            return Promise.resolve(form.sikBeforeSubmit()).then(function () {
               return token;
             });
           }
@@ -213,7 +213,7 @@
   }
 
   function init() {
-    var forms = document.querySelectorAll('form[data-sikf-form]');
+    var forms = document.querySelectorAll('form[data-sik-form]');
     for (var i = 0; i < forms.length; i++) attach(forms[i]);
   }
 

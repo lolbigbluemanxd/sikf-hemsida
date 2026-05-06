@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 /*
- * Prepared BankID endpoint for SIKF.
+ * Prepared BankID endpoint for SIK.
  *
  * This file is intentionally safe-by-default. It will not pretend to run a
  * BankID signing unless a real provider or bank supplies credentials/API URLs.
@@ -152,7 +152,7 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL) || $firstName === '' || $lastName
 }
 
 if (empty($config['bankid_enabled'])) {
-    bankid_json(false, 'BankID är förberett men inte aktiverat ännu. Anmälan kan skickas till SIKF så kontaktar föreningen dig för nästa steg.', 501, [
+    bankid_json(false, 'BankID är förberett men inte aktiverat ännu. Anmälan kan skickas till SIK så kontaktar föreningen dig för nästa steg.', 501, [
         'status' => 'provider_not_configured',
         'enabled' => false,
         'next_step' => 'submit_manual_registration',

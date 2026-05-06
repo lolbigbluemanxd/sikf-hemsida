@@ -5,7 +5,7 @@ ini_set('display_errors', '0');
 ini_set('log_errors', '1');
 
 /*
- * SIKF secure form endpoint.
+ * SIK secure form endpoint.
  *
  * Setup before publishing:
  * 1. Copy config.example.php to config.php.
@@ -33,8 +33,8 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
 $defaultConfig = [
     'email_to' => 'Mussamahad@gmail.com',
-    'from_email' => 'no-reply@sikforening.se',
-    'from_name' => 'SIKF Hemsida',
+    'from_email' => 'no-reply@example.com',
+    'from_name' => 'SIK Hemsida',
     'max_message_length' => 3000,
     'max_attachment_bytes' => 6000000,
     'email_enabled' => false,
@@ -126,7 +126,7 @@ function autogiro_pdf_attachment(?string $dataUri, ?string $filename, int $maxBy
     }
 
     return [
-        'filename' => safe_filename($filename, 'sikf-autogiro.pdf'),
+        'filename' => safe_filename($filename, 'sik-autogiro.pdf'),
         'content' => $binary,
     ];
 }
@@ -383,7 +383,7 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     json_response(false, 'Ange en giltig e-postadress.', 422);
 }
 
-$subject = clean_string($_POST['subject'] ?? 'Kontakt från SIKF hemsida', 120);
+$subject = clean_string($_POST['subject'] ?? 'Kontakt från SIK hemsida', 120);
 $message = clean_multiline($_POST['message'] ?? '', (int) $config['max_message_length']);
 $isDonor = isset($_POST['amount']) || stripos($subject, 'månad') !== false || stripos($subject, 'manad') !== false;
 
@@ -417,7 +417,7 @@ if ($isDonor) {
         json_response(false, 'Ange ett giltigt månadsbelopp.', 422);
     }
     if (empty($_POST['consent'])) {
-        json_response(false, 'Du behöver godkänna att SIKF kontaktar dig.', 422);
+        json_response(false, 'Du behöver godkänna att SIK kontaktar dig.', 422);
     }
     if ($personalNumber !== '' && !preg_match('/^[0-9]{6,8}[-+]?[0-9]{4}$/', $personalNumber)) {
         json_response(false, 'Personnummer har fel format.', 422);
@@ -426,7 +426,7 @@ if ($isDonor) {
         json_response(false, 'Fyll i bankuppgifter och ort/datum för autogiroanmälan.', 422);
     }
     if ($attachment === null) {
-        json_response(false, 'Den ifyllda PDF-blanketten saknas. Försök igen eller ladda ner PDF och kontakta SIKF.', 422);
+        json_response(false, 'Den ifyllda PDF-blanketten saknas. Försök igen eller ladda ner PDF och kontakta SIK.', 422);
     }
 } else {
     if ($name === '' || $subject === '' || $message === '') {
@@ -435,7 +435,7 @@ if ($isDonor) {
 }
 
 $displayName = trim($name . ' ' . $firstName . ' ' . $lastName);
-$mailSubjectText = '[SIKF] ' . ($subject !== '' ? $subject : 'Nytt meddelande');
+$mailSubjectText = '[SIK] ' . ($subject !== '' ? $subject : 'Nytt meddelande');
 $mailSubject = '=?UTF-8?B?' . base64_encode($mailSubjectText) . '?=';
 $bodyLines = [
     'Typ: ' . ($isDonor ? 'Månadsgivare/donation' : 'Kontakt'),
@@ -487,7 +487,7 @@ if ($isDonor && $savedDocumentPath !== '' && empty($config['email_enabled'])) {
 }
 
 $fromName = clean_string((string) $config['from_name'], 80);
-$fromEmail = filter_var($config['from_email'], FILTER_VALIDATE_EMAIL) ? $config['from_email'] : 'no-reply@sikforening.se';
+$fromEmail = filter_var($config['from_email'], FILTER_VALIDATE_EMAIL) ? $config['from_email'] : 'no-reply@sikorening.se';
 $emailTo = filter_var($config['email_to'], FILTER_VALIDATE_EMAIL) ? $config['email_to'] : 'Mussamahad@gmail.com';
 
 $headers = [
@@ -499,7 +499,7 @@ $headers = [
 
 $mailBody = $body;
 if ($attachment !== null) {
-    $boundary = 'SIKF-' . bin2hex(random_bytes(16));
+    $boundary = 'SIK-' . bin2hex(random_bytes(16));
     $headers[] = 'Content-Type: multipart/mixed; boundary="' . $boundary . '"';
     $mailBody = "--{$boundary}\r\n";
     $mailBody .= "Content-Type: text/plain; charset=UTF-8\r\n";
@@ -531,12 +531,12 @@ if (!$sent) {
             'saved' => true,
         ]);
     }
-    json_response(false, 'Meddelandet kunde inte skickas just nu. Kontakta SIKF direkt via e-post.', 500);
+    json_response(false, 'Meddelandet kunde inte skickas just nu. Kontakta SIK direkt via e-post.', 500);
 }
 
 json_response(true, $isDonor
     ? ($savedDocumentPath !== ''
-        ? 'Tack! Din ifyllda PDF-blankett är sparad och skickad till SIKF.'
-        : 'Tack! Din ifyllda PDF-blankett är skickad till SIKF.')
-    : 'Tack för ditt meddelande. SIKF kontaktar dig så snart som möjligt.'
+        ? 'Tack! Din ifyllda PDF-blankett är sparad och skickad till SIK.'
+        : 'Tack! Din ifyllda PDF-blankett är skickad till SIK.')
+    : 'Tack för ditt meddelande. SIK kontaktar dig så snart som möjligt.'
 , ['saved' => $savedDocumentPath !== '']);

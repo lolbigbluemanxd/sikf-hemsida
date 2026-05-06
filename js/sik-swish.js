@@ -1,12 +1,12 @@
 /*
- * SIKF Swish QR-generator
- * Bygger en levande Swish-QR på alla element med klassen .sikf-swish-widget.
+ * SIK Swish QR-generator
+ * Bygger en levande Swish-QR på alla element med klassen .sik-swish-widget.
  * Använder qrcodejs (laddas separat från CDN) för själva QR-grafiken.
  *
  * --- SETUP ---
- * SIKF:s Swish-nummer.
+ * SIK:s Swish-nummer.
  * Det är 10 siffror utan mellanslag.
- * När besokaren skannar QR med Swish-appen öppnas appen med SIKF som
+ * När besokaren skannar QR med Swish-appen öppnas appen med SIK som
  * mottagare, beloppet förifyllt och meddelandet förifyllt.
  */
 (function () {
@@ -14,7 +14,7 @@
 
   var SWISH_NUMBER = '1231982289';
   var DEFAULT_AMOUNT = 150;
-  var DEFAULT_MESSAGE = 'Donation SIKF';
+  var DEFAULT_MESSAGE = 'Donation SIK';
 
   function buildSwishUrl(number, amount, message) {
     // Officiell Swish-deeplink. Skannas QR med Swish-appen öppnar
@@ -35,7 +35,7 @@
   }
 
   function attachWidget(widget) {
-    var qrTarget = widget.querySelector('.sikf-swish-qr');
+    var qrTarget = widget.querySelector('.sik-swish-qr');
     if (!qrTarget) return;
     if (typeof window.QRCode === 'undefined') {
       qrTarget.textContent = 'QR-bibliotek kunde inte laddas.';
@@ -52,11 +52,11 @@
       correctLevel: window.QRCode.CorrectLevel.M
     });
 
-    var amountButtons = widget.querySelectorAll('.sikf-swish-amount');
-    var customWrap = widget.querySelector('.sikf-swish-custom-wrap');
-    var customInput = widget.querySelector('.sikf-swish-custom');
-    var summary = widget.querySelector('.sikf-swish-summary');
-    var numberDisplay = widget.querySelector('.sikf-swish-number');
+    var amountButtons = widget.querySelectorAll('.sik-swish-amount');
+    var customWrap = widget.querySelector('.sik-swish-custom-wrap');
+    var customInput = widget.querySelector('.sik-swish-custom');
+    var summary = widget.querySelector('.sik-swish-summary');
+    var numberDisplay = widget.querySelector('.sik-swish-number');
 
     if (numberDisplay) numberDisplay.textContent = formatSwishNumber(SWISH_NUMBER);
 
@@ -107,7 +107,7 @@
   }
 
   function init() {
-    var widgets = document.querySelectorAll('.sikf-swish-widget');
+    var widgets = document.querySelectorAll('.sik-swish-widget');
     for (var i = 0; i < widgets.length; i++) attachWidget(widgets[i]);
   }
 

@@ -4,8 +4,8 @@ declare(strict_types=1);
 return [
     // Copy this file to config.php and change these values on the server.
     'email_to' => 'Mussamahad@gmail.com',
-    'from_email' => 'no-reply@sikforening.se',
-    'from_name' => 'SIKF Hemsida',
+    'from_email' => 'no-reply@example.com',
+    'from_name' => 'SIK Hemsida',
 
     // Anti-spam limits per visitor/browser fingerprint.
     'rate_limit_count' => 5,
@@ -28,7 +28,7 @@ return [
     'smtp_encryption' => 'tls',
     'smtp_timeout_seconds' => 15,
 
-    // BankID/Autogiro preparation. Keep disabled until SIKF has a real provider.
+    // BankID/Autogiro preparation. Keep disabled until SIK has a real provider.
     'bankid_enabled' => false,
     'bankid_provider_name' => '',
     'bankid_provider_start_url' => '',

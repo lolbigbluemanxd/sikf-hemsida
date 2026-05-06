@@ -1,5 +1,5 @@
 /*
- * Prepared SIKF BankID flow.
+ * Prepared SIK BankID flow.
  * Safe-by-default: starts real signing only when bankid.php is configured with
  * a real BankID/Autogiro provider.
  */
@@ -98,13 +98,13 @@
         if (data && data.status === 'provider_not_configured') {
           setState(panel, 'prepared',
             'BankID är förberett',
-            data.message || 'Skicka anmälan så kontaktar SIKF dig för signering när rutinen är klar.');
+            data.message || 'Skicka anmälan så kontaktar SIK dig för signering när rutinen är klar.');
           return;
         }
 
         setState(panel, 'error',
           'BankID kunde inte startas',
-          (data && data.message) ? data.message : 'Försök igen eller skicka anmälan till SIKF.');
+          (data && data.message) ? data.message : 'Försök igen eller skicka anmälan till SIK.');
       })
       .catch(function () {
         setState(panel, 'error',
@@ -128,7 +128,7 @@
       });
     }
 
-    form.addEventListener('sikf:donor-step', function (event) {
+    form.addEventListener('sik:donor-step', function (event) {
       if (event.detail && event.detail.step === 5) {
         start(form, panel);
       }
