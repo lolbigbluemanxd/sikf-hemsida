@@ -190,7 +190,7 @@
 <button type="button" class="flow-back btn btn-default">Tillbaka</button>
 <button type="button" class="btn btn-default print-autogiro">Skriv ut blankett</button>
 <button type="button" class="btn btn-default download-autogiro">Ladda ner PDF</button>
-<button type="submit" class="btn btn-primary email-autogiro submit-autogiro">Skicka via e-post</button>
+<button type="submit" class="btn btn-primary save-autogiro submit-autogiro">Spara blankett</button>
 </div>
 <p class="bg-official-link"><a href="docs/bankgirot-autogiro-medgivande-till-kontonummer.pdf" target="_blank" rel="noopener">Öppna Bankgirots originalblankett</a></p>
 <a class="cancel-payment" href="stod-oss.html">Avbryt anmälan</a>
@@ -269,7 +269,7 @@
 <script src="js/bootstrap.min.js"></script>
 <script src="js/qrcode.min.js"></script>
 <script src="js/sikf-swish.js"></script>
-<script src="js/sikf-forms.js?v=20260506-2"></script>
+<script src="js/sikf-forms.js?v=20260506-3"></script>
 <script src="js/vendor/html2canvas.min.js"></script>
 <script src="js/vendor/jspdf.umd.min.js"></script>
 <script>
@@ -695,6 +695,19 @@
     });
   }
 
+  function saveAutogiroStatic() {
+    return createAutogiroPdf({
+      button: form.querySelector('button[type="submit"]'),
+      loadingText: 'Sparar PDF...',
+      save: true
+    }).then(function (result) {
+      if (!result || !result.ok) {
+        throw new Error('PDF kunde inte sparas.');
+      }
+      return { message: 'PDF-blanketten är sparad på din enhet.' };
+    });
+  }
+
   Array.prototype.forEach.call(form.querySelectorAll('.amount-choice'), function (button) {
     button.addEventListener('click', function () {
       Array.prototype.forEach.call(form.querySelectorAll('.amount-choice'), function (item) { item.classList.remove('active'); });
@@ -779,11 +792,7 @@
   if (downloadButton) downloadButton.addEventListener('click', downloadAutogiro);
 
   form.sikfBeforeSubmit = prepareAutogiroSubmit;
-
-  var submitButton = form.querySelector('button[type="submit"]');
-  if (submitButton && window.location.hostname.indexOf('github.io') !== -1) {
-    submitButton.style.display = 'none';
-  }
+  form.sikfStaticSubmit = saveAutogiroStatic;
 
   form.addEventListener('input', updateSummary);
   form.addEventListener('submit', updateSummary);

@@ -1,5 +1,7 @@
 config.php
 storage/*.log
 storage/rate_limit/*.json
+storage/autogiro_documents/*.pdf
+storage/autogiro_documents/*.json
 backups/*.zip
 localtunnel*.log

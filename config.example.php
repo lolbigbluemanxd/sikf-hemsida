@@ -14,6 +14,9 @@ return [
     // Maximum length for contact message text.
     'max_message_length' => 3000,
     'max_attachment_bytes' => 6000000,
+    'email_enabled' => false,
+    'save_autogiro_pdf' => true,
+    'saved_documents_dir' => __DIR__ . '/storage/autogiro_documents',
 
     // SMTP e-mail delivery. Copy this file to config.php and fill these on the server.
     // For Gmail: enable 2-step verification, create an app password, then use smtp.gmail.com:587 tls.

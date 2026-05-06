@@ -69,6 +69,11 @@
     return new URL(ENDPOINT, window.location.href).toString();
   }
 
+  function isStaticOnly() {
+    return window.location.protocol === 'file:' ||
+      window.location.hostname.indexOf('github.io') !== -1;
+  }
+
   function getCsrfToken() {
     if (window.location.protocol === 'file:') {
       return Promise.reject(new Error('Forms require a hosted PHP server.'));
@@ -125,6 +130,22 @@
 
       var btn = form.querySelector('button[type="submit"], input[type="submit"]');
       setButtonLoading(btn, true);
+
+      if (isStaticOnly() && typeof form.sikfStaticSubmit === 'function') {
+        Promise.resolve(form.sikfStaticSubmit())
+          .then(function (data) {
+            showFeedback(form, 'success',
+              (data && data.message) ? data.message : 'PDF-blanketten är sparad på din enhet.');
+          })
+          .catch(function (error) {
+            showFeedback(form, 'error',
+              (error && error.message) ? error.message : 'PDF kunde inte sparas.');
+          })
+          .then(function () {
+            setButtonLoading(btn, false);
+          });
+        return;
+      }
 
       getCsrfToken()
         .then(function (token) {

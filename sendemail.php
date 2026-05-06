@@ -37,6 +37,9 @@ $defaultConfig = [
     'from_name' => 'SIKF Hemsida',
     'max_message_length' => 3000,
     'max_attachment_bytes' => 6000000,
+    'email_enabled' => false,
+    'save_autogiro_pdf' => true,
+    'saved_documents_dir' => __DIR__ . '/storage/autogiro_documents',
     'rate_limit_count' => 5,
     'rate_limit_window_seconds' => 900,
     'smtp_enabled' => false,
@@ -128,6 +131,52 @@ function autogiro_pdf_attachment(?string $dataUri, ?string $filename, int $maxBy
     ];
 }
 
+function ensure_private_directory(string $dir): void
+{
+    if (!is_dir($dir) && !mkdir($dir, 0755, true) && !is_dir($dir)) {
+        throw new RuntimeException('Documents directory could not be created.');
+    }
+
+    $htaccess = $dir . '/.htaccess';
+    if (!is_file($htaccess)) {
+        file_put_contents($htaccess, "Require all denied\nOptions -Indexes\n", LOCK_EX);
+    }
+
+    $index = $dir . '/index.html';
+    if (!is_file($index)) {
+        file_put_contents($index, '', LOCK_EX);
+    }
+}
+
+function save_autogiro_document(array $attachment, array $meta, string $dir): string
+{
+    ensure_private_directory($dir);
+
+    $datePrefix = date('Ymd-His');
+    $random = bin2hex(random_bytes(4));
+    $pdfName = safe_filename($datePrefix . '-' . $random . '-' . $attachment['filename'], 'autogiro.pdf');
+    $pdfPath = rtrim($dir, '/\\') . DIRECTORY_SEPARATOR . $pdfName;
+
+    if (file_put_contents($pdfPath, $attachment['content'], LOCK_EX) === false) {
+        throw new RuntimeException('PDF document could not be saved.');
+    }
+
+    $metaPath = preg_replace('/\.pdf$/i', '.json', $pdfPath) ?? ($pdfPath . '.json');
+    $safeMeta = [
+        'created_at' => date('c'),
+        'filename' => $pdfName,
+        'name' => $meta['name'] ?? '',
+        'email' => $meta['email'] ?? '',
+        'phone' => $meta['phone'] ?? '',
+        'amount' => $meta['amount'] ?? '',
+        'bank' => $meta['bank'] ?? '',
+        'place_date' => $meta['place_date'] ?? '',
+    ];
+    file_put_contents($metaPath, json_encode($safeMeta, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT), LOCK_EX);
+
+    return $pdfPath;
+}
+
 function is_same_origin_request(): bool
 {
     $serverHost = $_SERVER['HTTP_HOST'] ?? '';
@@ -196,6 +245,7 @@ function log_event(string $type, array $context = []): void
         'subject' => $context['subject'] ?? '',
         'email_hash' => !empty($context['email']) ? hash('sha256', strtolower($context['email'])) : '',
         'success' => $context['success'] ?? null,
+        'saved' => $context['saved'] ?? null,
     ];
 
     file_put_contents(
@@ -406,6 +456,35 @@ $bodyLines = [
     $message,
 ];
 $body = implode("\n", $bodyLines);
+$savedDocumentPath = '';
+if ($isDonor && $attachment !== null && !empty($config['save_autogiro_pdf'])) {
+    try {
+        $savedDocumentPath = save_autogiro_document($attachment, [
+            'name' => $displayName,
+            'email' => $email,
+            'phone' => $phone,
+            'amount' => $amount !== false ? $amount . ' kr/månad' : '',
+            'bank' => $bank,
+            'place_date' => $signaturePlaceDate,
+        ], (string) $config['saved_documents_dir']);
+    } catch (Throwable $e) {
+        error_log($e->getMessage());
+        json_response(false, 'PDF-blanketten kunde inte sparas. Kontrollera att storage-mappen är skrivbar.', 500);
+    }
+}
+
+if ($isDonor && $savedDocumentPath !== '' && empty($config['email_enabled'])) {
+    log_event('donor_form', [
+        'subject' => $subject,
+        'email' => $email,
+        'success' => true,
+        'saved' => true,
+    ]);
+
+    json_response(true, 'PDF-blanketten är sparad i dokumentmappen.', 200, [
+        'saved' => true,
+    ]);
+}
 
 $fromName = clean_string((string) $config['from_name'], 80);
 $fromEmail = filter_var($config['from_email'], FILTER_VALIDATE_EMAIL) ? $config['from_email'] : 'no-reply@sikforening.se';
@@ -443,13 +522,21 @@ log_event($isDonor ? 'donor_form' : 'contact_form', [
     'subject' => $subject,
     'email' => $email,
     'success' => $sent,
+    'saved' => $savedDocumentPath !== '',
 ]);
 
 if (!$sent) {
+    if ($savedDocumentPath !== '') {
+        json_response(true, 'PDF-blanketten är sparad i dokumentmappen. E-post är inte aktiverad på den här servern.', 200, [
+            'saved' => true,
+        ]);
+    }
     json_response(false, 'Meddelandet kunde inte skickas just nu. Kontakta SIKF direkt via e-post.', 500);
 }
 
 json_response(true, $isDonor
-    ? 'Tack! Din ifyllda PDF-blankett är skickad till SIKF.'
+    ? ($savedDocumentPath !== ''
+        ? 'Tack! Din ifyllda PDF-blankett är sparad och skickad till SIKF.'
+        : 'Tack! Din ifyllda PDF-blankett är skickad till SIKF.')
     : 'Tack för ditt meddelande. SIKF kontaktar dig så snart som möjligt.'
-);
+, ['saved' => $savedDocumentPath !== '']);
