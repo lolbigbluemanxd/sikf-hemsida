@@ -136,7 +136,7 @@
 
 <section class="donor-step" data-step="5">
 <h3>5. Autogiroblankett</h3>
-<p class="helper-note">Skriv ut blanketten, låt betalaren skriva under och lämna den till SIKF. Föreningen skickar sedan underlaget vidare enligt bankens rutin.</p>
+<p class="helper-note">Kontrollera uppgifterna, tryck på Underskriv och skicka sedan blanketten till SIKF. Föreningen skickar underlaget vidare enligt bankens rutin.</p>
 <div class="autogiro-preview" id="autogiro-preview">
 <div class="autogiro-head">
 <strong>Autogiroanmälan</strong>
@@ -166,12 +166,14 @@
 </div>
 <div class="autogiro-signature">
 <div><span>Ort och datum</span><strong data-ag="placeDate"></strong></div>
-<div class="signature-box"><span>Betalarens underskrift</span><canvas id="signature-canvas" aria-label="Skriv din underskrift här"></canvas><button type="button" class="signature-clear">Rensa</button></div>
+<div class="signature-box"><span>Betalarens underskrift</span><div class="signature-preview"><img id="signature-preview-image" alt="Betalarens underskrift" hidden><em data-signature-status>Inte underskriven ännu</em></div><button type="button" class="btn btn-default signature-open">Underskriv</button></div>
 </div>
 </div>
 <div class="flow-actions final-actions">
 <button type="button" class="flow-back btn btn-default">Tillbaka</button>
 <button type="button" class="btn btn-default print-autogiro">Skriv ut blankett</button>
+<button type="button" class="btn btn-default download-autogiro">Ladda ner blankett</button>
+<button type="button" class="btn btn-primary email-autogiro">Skicka via e-post</button>
 <button type="submit" class="btn btn-primary">Skicka anmälan till SIKF</button>
 </div>
 <a class="cancel-payment" href="stod-oss.html">Avbryt anmälan</a>
@@ -181,6 +183,19 @@
 </div>
 </div>
 </section>
+
+<div class="signature-modal" id="signature-modal" hidden role="dialog" aria-modal="true" aria-labelledby="signature-title">
+<div class="signature-dialog">
+<h3 id="signature-title">Underskriv autogiroanmälan</h3>
+<p>Skriv din underskrift med mus, touchpad eller finger.</p>
+<canvas id="signature-canvas" aria-label="Skriv din underskrift här"></canvas>
+<div class="signature-dialog-actions">
+<button type="button" class="btn btn-default signature-clear">Rensa</button>
+<button type="button" class="btn btn-default signature-cancel">Avbryt</button>
+<button type="button" class="btn btn-primary signature-save">Spara underskrift</button>
+</div>
+</div>
+</div>
 
 <section class="sikf-swish-section">
 <div class="container">
@@ -258,8 +273,15 @@
   };
   var signatureCanvas = document.getElementById('signature-canvas');
   var signatureInput = document.getElementById('signature-data');
-  var signatureClear = form.querySelector('.signature-clear');
+  var signatureModal = document.getElementById('signature-modal');
+  var signatureOpen = form.querySelector('.signature-open');
+  var signatureClear = signatureModal ? signatureModal.querySelector('.signature-clear') : null;
+  var signatureCancel = signatureModal ? signatureModal.querySelector('.signature-cancel') : null;
+  var signatureSave = signatureModal ? signatureModal.querySelector('.signature-save') : null;
+  var signaturePreview = document.getElementById('signature-preview-image');
+  var signatureStatus = form.querySelector('[data-signature-status]');
   var signatureHasInk = false;
+  var signatureImage = '';
   var resizeSignatureCanvas = function () {};
 
   function showStep(step) {
@@ -271,9 +293,6 @@
       dot.classList.toggle('active', Number(dot.getAttribute('data-progress')) <= step);
     });
     updateSummary();
-    if (step === 5) {
-      setTimeout(resizeSignatureCanvas, 50);
-    }
     try {
       form.dispatchEvent(new CustomEvent('sikf:donor-step', { detail: { step: step } }));
     } catch (e) {}
@@ -364,10 +383,10 @@
       ctx.lineJoin = 'round';
       ctx.lineWidth = 2.4;
       ctx.strokeStyle = '#111';
-      if (oldSignature) {
+      if (oldSignature || signatureImage) {
         var img = new Image();
         img.onload = function () { ctx.drawImage(img, 0, 0, rect.width, rect.height); };
-        img.src = oldSignature;
+        img.src = oldSignature || signatureImage;
       }
     }
 
@@ -395,18 +414,17 @@
       ctx.lineTo(p.x, p.y);
       ctx.stroke();
       signatureHasInk = true;
-      if (signatureInput) signatureInput.value = signatureCanvas.toDataURL('image/png');
     }
 
     function end() {
       if (!drawing) return;
       drawing = false;
-      if (signatureHasInk && signatureInput) signatureInput.value = signatureCanvas.toDataURL('image/png');
     }
 
-    resizeCanvas();
     resizeSignatureCanvas = resizeCanvas;
-    window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('resize', function () {
+      if (signatureModal && !signatureModal.hidden) resizeCanvas();
+    });
     signatureCanvas.addEventListener('mousedown', start);
     signatureCanvas.addEventListener('mousemove', move);
     window.addEventListener('mouseup', end);
@@ -418,39 +436,76 @@
       signatureClear.addEventListener('click', function () {
         ctx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
         signatureHasInk = false;
-        if (signatureInput) signatureInput.value = '';
       });
     }
   }
 
+  function updateSignaturePreview() {
+    if (!signaturePreview || !signatureStatus) return;
+    if (signatureImage) {
+      signaturePreview.src = signatureImage;
+      signaturePreview.hidden = false;
+      signatureStatus.hidden = true;
+    } else {
+      signaturePreview.hidden = true;
+      signatureStatus.hidden = false;
+      signatureStatus.textContent = 'Inte underskriven ännu';
+    }
+  }
+
+  function openSignatureModal() {
+    if (!signatureModal) return;
+    signatureModal.hidden = false;
+    document.body.classList.add('signature-modal-open');
+    signatureHasInk = false;
+    setTimeout(resizeSignatureCanvas, 30);
+  }
+
+  function closeSignatureModal() {
+    if (!signatureModal) return;
+    signatureModal.hidden = true;
+    document.body.classList.remove('signature-modal-open');
+  }
+
+  function saveSignature() {
+    if (!signatureCanvas) return;
+    if (!signatureHasInk && !signatureImage) {
+      alert('Skriv din underskrift innan du sparar.');
+      return;
+    }
+    signatureImage = signatureCanvas.toDataURL('image/png');
+    if (signatureInput) signatureInput.value = signatureImage;
+    updateSignaturePreview();
+    closeSignatureModal();
+  }
+
   function printableHtml() {
     var clone = document.getElementById('autogiro-preview').cloneNode(true);
-    var canvas = clone.querySelector('#signature-canvas');
-    if (canvas) {
-      var replacement;
-      if (signatureHasInk && signatureCanvas) {
-        replacement = document.createElement('img');
-        replacement.src = signatureCanvas.toDataURL('image/png');
-        replacement.alt = 'Betalarens underskrift';
-        replacement.className = 'signature-print-image';
-      } else {
-        replacement = document.createElement('div');
-        replacement.className = 'signature-print-empty';
-      }
-      canvas.parentNode.replaceChild(replacement, canvas);
+    var unsigned = clone.querySelector('[data-signature-status]');
+    if (unsigned && signatureImage) unsigned.parentNode.removeChild(unsigned);
+    var previewImage = clone.querySelector('#signature-preview-image');
+    if (previewImage && signatureImage) {
+      previewImage.src = signatureImage;
+      previewImage.hidden = false;
     }
     var clear = clone.querySelector('.signature-clear');
     if (clear) clear.parentNode.removeChild(clear);
+    var open = clone.querySelector('.signature-open');
+    if (open) open.parentNode.removeChild(open);
     return '<!doctype html><html lang="sv"><head><meta charset="utf-8"><title>Autogiroanmälan SIKF</title><style>' +
-      '@page{size:A4 portrait;margin:12mm}*{box-sizing:border-box}body{font-family:Arial,sans-serif;color:#111;margin:0}.autogiro-preview{border:0;margin:0;padding:0}.autogiro-head{border-bottom:2px solid #111;margin-bottom:10px;padding-bottom:8px}.autogiro-head strong{display:block;font-size:22px;font-weight:900}.autogiro-head span{display:block;font-size:16px;font-weight:800}.autogiro-grid{display:grid;gap:10px;grid-template-columns:1fr 1fr}.autogiro-box{border:1px solid #222;padding:10px;break-inside:avoid}.autogiro-box h4{font-size:15px;margin:0 0 8px}.autogiro-box p{border-bottom:1px solid #bbb;font-size:12px;line-height:1.25;margin:0 0 6px;min-height:20px;padding-bottom:4px}.autogiro-full{margin-top:10px}.autogiro-full p{border-bottom:0;font-size:12px;line-height:1.35}.autogiro-signature{display:grid;gap:10px;grid-template-columns:1fr 1fr;margin-top:10px}.autogiro-signature div{border:1px solid #222;min-height:72px;padding:8px}.autogiro-signature span{display:block;font-size:12px;font-weight:800;margin-bottom:8px}.signature-clear{display:none}.signature-print-image,.signature-print-empty{display:block;height:44px;width:100%;object-fit:contain;object-position:left bottom}' +
+      '@page{size:A4 portrait;margin:12mm}*{box-sizing:border-box}body{font-family:Arial,sans-serif;color:#111;margin:0}.autogiro-preview{border:0;margin:0;padding:0}.autogiro-head{border-bottom:2px solid #111;margin-bottom:10px;padding-bottom:8px}.autogiro-head strong{display:block;font-size:22px;font-weight:900}.autogiro-head span{display:block;font-size:16px;font-weight:800}.autogiro-grid{display:grid;gap:10px;grid-template-columns:1fr 1fr}.autogiro-box{border:1px solid #222;padding:10px;break-inside:avoid}.autogiro-box h4{font-size:15px;margin:0 0 8px}.autogiro-box p{border-bottom:1px solid #bbb;font-size:12px;line-height:1.25;margin:0 0 6px;min-height:20px;padding-bottom:4px}.autogiro-full{margin-top:10px}.autogiro-full p{border-bottom:0;font-size:12px;line-height:1.35}.autogiro-signature{display:grid;gap:10px;grid-template-columns:1fr 1fr;margin-top:10px}.autogiro-signature div{border:1px solid #222;min-height:72px;padding:8px}.autogiro-signature span{display:block;font-size:12px;font-weight:800;margin-bottom:8px}.signature-preview{border-bottom:1px solid #777;min-height:46px}.signature-preview img{display:block;max-height:44px;max-width:100%;object-fit:contain;object-position:left bottom}.signature-open,.signature-clear{display:none}' +
       '</style></head><body>' + clone.outerHTML + '</body></html>';
+  }
+
+  function requireSignature() {
+    if (signatureImage) return true;
+    alert('Tryck på Underskriv och spara din underskrift först.');
+    return false;
   }
 
   function printAutogiro() {
     updateSummary();
-    if (signatureHasInk && signatureInput && signatureCanvas) {
-      signatureInput.value = signatureCanvas.toDataURL('image/png');
-    }
+    if (!requireSignature()) return;
     var printWindow = window.open('', '_blank', 'width=900,height=700');
     if (!printWindow) {
       document.body.classList.add('is-printing-autogiro');
@@ -466,6 +521,41 @@
       printWindow.print();
       printWindow.close();
     }, 300);
+  }
+
+  function downloadAutogiro() {
+    updateSummary();
+    if (!requireSignature()) return false;
+    var blob = new Blob([printableHtml()], { type: 'text/html;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var link = document.createElement('a');
+    var name = [formValue('first_name'), formValue('last_name')].filter(Boolean).join('-').toLowerCase() || 'blankett';
+    link.href = url;
+    link.download = 'sikf-autogiro-' + name + '.html';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    return true;
+  }
+
+  function emailAutogiro() {
+    if (!downloadAutogiro()) return;
+    var fullName = [formValue('first_name'), formValue('last_name')].filter(Boolean).join(' ');
+    var body = [
+      'Assalamu alaykum SIKF,',
+      '',
+      'Jag vill skicka in min autogiroanmälan.',
+      '',
+      'Namn: ' + fullName,
+      'Personnummer: ' + formValue('personal_number'),
+      'Belopp: ' + amount + ' kr/månad',
+      'Bank: ' + formValue('bank'),
+      '',
+      'Jag bifogar den signerade blanketten som laddades ner från hemsidan.',
+      ''
+    ].join('\n');
+    window.location.href = 'mailto:sikforening@gmail.com?subject=' + encodeURIComponent('Autogiroanmälan SIKF - ' + fullName) + '&body=' + encodeURIComponent(body);
   }
 
   Array.prototype.forEach.call(form.querySelectorAll('.amount-choice'), function (button) {
@@ -532,12 +622,27 @@
     alert('Automatisk ifyllnad kan kopplas in senare. Fyll i uppgifterna manuellt just nu.');
   });
 
+  if (signatureOpen) signatureOpen.addEventListener('click', openSignatureModal);
+  if (signatureCancel) signatureCancel.addEventListener('click', closeSignatureModal);
+  if (signatureSave) signatureSave.addEventListener('click', saveSignature);
+  if (signatureModal) {
+    signatureModal.addEventListener('click', function (event) {
+      if (event.target === signatureModal) closeSignatureModal();
+    });
+  }
+
   var printButton = form.querySelector('.print-autogiro');
   if (printButton) {
     printButton.addEventListener('click', function () {
       printAutogiro();
     });
   }
+
+  var downloadButton = form.querySelector('.download-autogiro');
+  if (downloadButton) downloadButton.addEventListener('click', downloadAutogiro);
+
+  var emailButton = form.querySelector('.email-autogiro');
+  if (emailButton) emailButton.addEventListener('click', emailAutogiro);
 
   var submitButton = form.querySelector('button[type="submit"]');
   if (submitButton && window.location.hostname.indexOf('github.io') !== -1) {
@@ -548,6 +653,7 @@
   form.addEventListener('submit', updateSummary);
   updateAmount(150);
   setupSignaturePad();
+  updateSignaturePreview();
 })();
 </script>
 </body>
