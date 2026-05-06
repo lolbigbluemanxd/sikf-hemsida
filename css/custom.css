@@ -1742,6 +1742,62 @@ body.is-exporting-autogiro .pdf-export-form .signature-preview {
   margin-left: 0;
 }
 
+.privacy-section {
+  background: #f6f8f5;
+  padding: 70px 0;
+}
+
+.privacy-card {
+  background: #fff;
+  border: 1px solid #dfe8e3;
+  border-radius: 6px;
+  box-shadow: 0 14px 34px rgba(9, 29, 22, 0.06);
+  padding: 42px;
+}
+
+.privacy-card h2 {
+  color: var(--sikf-ink);
+  font-size: 24px;
+  margin: 30px 0 12px;
+}
+
+.privacy-card h2:first-of-type {
+  margin-top: 0;
+}
+
+.privacy-card p {
+  color: #27342f;
+  font-size: 16px;
+  line-height: 1.75;
+  margin-bottom: 14px;
+}
+
+.privacy-updated {
+  color: #64726d;
+  font-weight: 700;
+  margin-bottom: 26px;
+}
+
+.donor-privacy-note {
+  background: #eef7f1;
+  border-left: 4px solid var(--sikf-green);
+  color: #27342f;
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 22px 0 0;
+  padding: 14px 16px;
+}
+
+.donor-privacy-note i {
+  color: var(--sikf-green);
+  margin-right: 8px;
+}
+
+.donor-privacy-note a {
+  font-weight: 800;
+  text-decoration: underline;
+}
+
 @media (max-width: 767px) {
   #main-slider .carousel h1 {
     font-size: 34px;
@@ -1804,6 +1860,10 @@ body.is-exporting-autogiro .pdf-export-form .signature-preview {
   .sikf-footer-mini {
     justify-content: flex-start;
     margin-top: 10px;
+  }
+
+  .privacy-card {
+    padding: 26px 20px;
   }
 
   .donor-flow {
