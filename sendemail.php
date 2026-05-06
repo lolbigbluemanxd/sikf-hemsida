@@ -1,6 +1,9 @@
 <?php
 declare(strict_types=1);
 
+ini_set('display_errors', '0');
+ini_set('log_errors', '1');
+
 /*
  * SIKF secure form endpoint.
  *
@@ -327,7 +330,7 @@ if ($attachment !== null) {
     $headers[] = 'Content-Type: text/plain; charset=UTF-8';
 }
 
-$sent = mail($emailTo, $mailSubject, $mailBody, implode("\r\n", $headers));
+$sent = @mail($emailTo, $mailSubject, $mailBody, implode("\r\n", $headers));
 log_event($isDonor ? 'donor_form' : 'contact_form', [
     'subject' => $subject,
     'email' => $email,
