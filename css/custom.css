@@ -1164,86 +1164,163 @@ a,
   font-size: 14px !important;
 }
 
-.autogiro-preview {
+.bg-autogiro-form {
   background: #fff;
   border: 2px solid #d4ded8;
   color: #111;
+  font-family: Georgia, "Times New Roman", serif;
   margin-bottom: 22px;
-  padding: 28px;
+  padding: 30px 34px;
 }
 
-.autogiro-head {
+.bg-form-top {
   align-items: flex-start;
-  border-bottom: 2px solid #111;
   display: flex;
   justify-content: space-between;
-  margin-bottom: 18px;
-  padding-bottom: 14px;
+  margin-bottom: 28px;
 }
 
-.autogiro-head strong {
-  color: #8e1d3d;
-  font-size: 28px;
-  font-weight: 900;
+.bankgirot-logo {
+  align-items: center;
+  color: #9f2a55;
+  display: flex;
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 700;
+  margin-bottom: 10px;
 }
 
-.autogiro-head span {
+.bankgirot-mark {
+  align-items: center;
+  background: #9f2a55;
+  border-radius: 2px;
+  color: #fff;
+  display: inline-flex;
+  font-size: 19px;
+  height: 30px;
+  justify-content: center;
+  line-height: 1;
+  margin-right: 5px;
+  width: 24px;
+}
+
+.bankgirot-word {
+  font-size: 32px;
+  letter-spacing: 0;
+}
+
+.bg-form-top p {
+  color: #333;
+  font-size: 14px;
+  line-height: 1.25;
+  margin: 0;
+}
+
+.bg-form-top h3 {
+  color: #333;
+  font-family: Arial, sans-serif;
   font-size: 22px;
   font-weight: 800;
+  line-height: 1.15;
+  margin: 8px 0 0;
   text-align: right;
 }
 
-.autogiro-grid {
+.bg-form-columns,
+.bg-form-lower {
   display: grid;
-  gap: 18px;
+  gap: 22px;
   grid-template-columns: 1fr 1fr;
 }
 
-.autogiro-box {
-  border: 1px solid #222;
-  padding: 16px;
-}
-
-.autogiro-box h4 {
-  color: #111;
-  font-size: 18px;
-  font-weight: 900;
-  margin: 0 0 12px;
-}
-
-.autogiro-box p {
-  border-bottom: 1px solid #bbb;
-  margin: 0 0 9px;
-  min-height: 26px;
-  padding-bottom: 6px;
-}
-
-.autogiro-full {
-  margin-top: 18px;
-}
-
-.autogiro-full p {
-  border-bottom: 0;
-  line-height: 1.45;
-}
-
-.autogiro-signature {
-  display: grid;
-  gap: 18px;
-  grid-template-columns: 1fr 1fr;
-  margin-top: 18px;
-}
-
-.autogiro-signature div {
-  border: 1px solid #222;
-  min-height: 78px;
-  padding: 10px 12px;
-}
-
-.autogiro-signature span {
-  display: block;
+.bg-column h4,
+.bg-mandate-text h4 {
+  color: #333;
+  font-family: Arial, sans-serif;
+  font-size: 16px;
   font-weight: 800;
-  margin-bottom: 18px;
+  margin: 0 0 8px;
+}
+
+.bg-field {
+  border: 1px solid #777;
+  border-bottom: 0;
+  min-height: 44px;
+  padding: 3px 7px 5px;
+}
+
+.bg-field:last-of-type {
+  border-bottom: 1px solid #777;
+}
+
+.bg-field-tall {
+  min-height: 70px;
+}
+
+.bg-field label {
+  color: #555;
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.1;
+  margin: 0 0 2px;
+}
+
+.bg-field span,
+.bg-field strong {
+  color: #111;
+  display: block;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.25;
+  min-height: 18px;
+}
+
+.bg-field strong {
+  font-weight: 700;
+}
+
+.bg-required {
+  color: #333;
+  font-size: 13px;
+  line-height: 1.2;
+  margin: 6px 0 0;
+}
+
+.bg-clearing-note {
+  color: #333;
+  font-size: 10px;
+  line-height: 1.12;
+  margin: 10px 0 0;
+}
+
+.bg-form-lower {
+  align-items: start;
+  margin-top: 24px;
+}
+
+.bg-mandate-text p {
+  color: #222;
+  font-size: 15px;
+  line-height: 1.22;
+  margin: 0;
+}
+
+.bg-signature-field {
+  min-height: 96px;
+}
+
+.bg-privacy-text {
+  color: #333;
+  font-size: 13px;
+  line-height: 1.16;
+  margin: 28px 0 0;
+}
+
+.bg-copyright {
+  color: #555;
+  font-size: 10px;
+  margin: 46px 0 0;
 }
 
 .signature-box {
@@ -1359,6 +1436,16 @@ body.signature-modal-open {
   font-weight: 800;
 }
 
+.bg-official-link {
+  margin: 4px 0 8px;
+}
+
+.bg-official-link a {
+  color: var(--sikf-green);
+  font-weight: 800;
+  text-decoration: underline;
+}
+
 .cancel-payment {
   color: #111;
   display: inline-block;
@@ -1457,20 +1544,20 @@ body.signature-modal-open {
     grid-template-columns: 1fr;
   }
 
-  .autogiro-head,
-  .autogiro-grid,
-  .autogiro-signature {
+  .bg-form-top,
+  .bg-form-columns,
+  .bg-form-lower {
     display: block;
   }
 
-  .autogiro-head span {
-    display: block;
-    margin-top: 8px;
+  .bg-form-top h3 {
+    margin-top: 16px;
     text-align: left;
   }
 
-  .autogiro-box,
-  .autogiro-signature div {
+  .bg-column,
+  .bg-mandate-text,
+  .bg-signature-fields {
     margin-bottom: 14px;
   }
 
@@ -1505,6 +1592,7 @@ body.signature-modal-open {
   body.is-printing-autogiro .flow-progress,
   body.is-printing-autogiro .donor-step:not([data-step="5"]),
   body.is-printing-autogiro .flow-actions,
+  body.is-printing-autogiro .bg-official-link,
   body.is-printing-autogiro .cancel-payment,
   body.is-printing-autogiro .sikf-form-feedback {
     display: none !important;

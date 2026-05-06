@@ -137,37 +137,46 @@
 <section class="donor-step" data-step="5">
 <h3>5. Autogiroblankett</h3>
 <p class="helper-note">Kontrollera uppgifterna, tryck på Underskriv och skicka sedan blanketten till SIKF. Föreningen skickar underlaget vidare enligt bankens rutin.</p>
-<div class="autogiro-preview" id="autogiro-preview">
-<div class="autogiro-head">
-<strong>Autogiroanmälan</strong>
-<span>Medgivande till kontonummer</span>
+<div class="autogiro-preview bg-autogiro-form" id="autogiro-preview">
+<div class="bg-form-top">
+<div>
+<div class="bankgirot-logo" aria-label="Bankgirot"><span class="bankgirot-mark">bg</span><span class="bankgirot-word">bankgirot</span></div>
+<p>Ifylld och underskriven blankett skickas till betalningsmottagaren.<br>Notera: Blanketter som skickas till Bankgirot kommer inte att hanteras.</p>
 </div>
-<div class="autogiro-grid">
-<div class="autogiro-box">
+<h3>Autogiroanmälan,<br>medgivande till kontonummer</h3>
+</div>
+<div class="bg-form-columns">
+<div class="bg-column">
 <h4>Betalningsmottagare</h4>
-<p><strong>Somaliska Islamiska Kultur Förening</strong></p>
-<p>Lantmannavägen 42<br>461 60 Trollhättan</p>
-<p>Organisationsnummer: 8024707211</p>
-<p>Bankgiro: 166-6221</p>
+<div class="bg-field"><label>Namn*</label><strong>Somaliska Islamiska Kultur Förening</strong></div>
+<div class="bg-field bg-field-tall"><label>Fullständig adress*</label><span>Lantmannavägen 38-40<br>461 60 Trollhättan</span></div>
+<div class="bg-field"><label>Organisationsnummer (10 siffror)*</label><span>8024707211</span></div>
+<div class="bg-field"><label>Bankgironummer</label><span>166-6221</span></div>
+<p class="bg-required">* Markerade uppgifter är obligatoriska</p>
 </div>
-<div class="autogiro-box">
+<div class="bg-column">
 <h4>Betalare</h4>
-<p>Namn: <span data-ag="name"></span></p>
-<p>Adress: <span data-ag="address"></span></p>
-<p>Person-/organisationsnummer: <span data-ag="personal"></span></p>
-<p>Betaltjänstleverantör: <span data-ag="bank"></span></p>
-<p>Konto: <span data-ag="account"></span></p>
+<div class="bg-field"><label>Namn*</label><span data-ag="name"></span></div>
+<div class="bg-field bg-field-tall"><label>Fullständig adress</label><span data-ag="address"></span></div>
+<div class="bg-field"><label>Person-/organisationsnummer (10 siffror)*</label><span data-ag="personal"></span></div>
+<div class="bg-field"><label>Betaltjänstleverantör*</label><span data-ag="bank"></span></div>
+<div class="bg-field"><label>Konto (Clearingnummer+kontonummer)*</label><span data-ag="account"></span></div>
+<div class="bg-field"><label>Betalar-/kundnummer</label><span></span></div>
+<p class="bg-clearing-note">Clearingnumret är det fyrsiffriga nummer som betecknar ett kontor eller en avdelning hos betaltjänstleverantören, se kontoutdraget. Normalt är clearingnumret de första fyra siffrorna i kontonumret. Swedbank har ibland fem siffror, ex 8327 - 9XXXXX. Utelämna då femte siffran, i detta fall 9. Handelsbankens clearingnummer ska alltid börja med 6 (hittar du inte det ange 6000). Personkonto i Nordea där kontonumret är samma som ditt personnummer: Clearingnummer = 3300 - ÅÅMMDDXXXX. Personkonto i Nordea där kontonumret inte är ett personnummer: Clearingnummer = de fyra första siffrorna i kontonumret. PlusGirokontot i Nordea: Clearingnummer = 9960.</p>
 </div>
 </div>
-<div class="autogiro-box autogiro-full">
-<h4>Medgivande via Autogiro</h4>
-<p>Betalaren medger att betalning får göras genom uttag från angivet konto på begäran av Somaliska Islamiska Kultur Förening. Månadsgåva: <strong><span data-summary-amount>150</span> kr/månad</strong>.</p>
-<p>Betalaren samtycker till att nödvändiga person- och betalningsuppgifter behandlas för administration av autogirotjänsten.</p>
+<div class="bg-form-lower">
+<div class="bg-mandate-text">
+<h4>Medgivande till betalning via Autogiro</h4>
+<p>Undertecknad ("betalaren"), medger att betalning får göras genom uttag från angivet konto, på begäran av angiven betalningsmottagare för betalning till denne på viss dag ("förfallodagen") via Autogiro.</p>
 </div>
-<div class="autogiro-signature">
-<div><span>Ort och datum</span><strong data-ag="placeDate"></strong></div>
-<div class="signature-box"><span>Betalarens underskrift</span><div class="signature-preview"><img id="signature-preview-image" alt="Betalarens underskrift" hidden><em data-signature-status>Inte underskriven ännu</em></div><button type="button" class="btn btn-default signature-open">Underskriv</button></div>
+<div class="bg-signature-fields">
+<div class="bg-field"><label>Ort och datum*</label><strong data-ag="placeDate"></strong></div>
+<div class="bg-field bg-signature-field signature-box"><label>Betalarens underskrift*</label><div class="signature-preview"><img id="signature-preview-image" alt="Betalarens underskrift" hidden><em data-signature-status>Inte underskriven ännu</em></div><button type="button" class="btn btn-default signature-open">Underskriv</button></div>
 </div>
+</div>
+<p class="bg-privacy-text">Betalaren samtycker till att behandling av personuppgifter som lämnats i detta medgivande behandlas av betalarens betaltjänstleverantör, betalningsmottagaren, betalningsmottagarens betaltjänstleverantör och Bankgirocentralen BGC AB för administration av tjänsten. Personuppgiftsansvariga för denna personuppgiftsbehandling är betalarens betaltjänstleverantör, betalningsmottagaren samt betalningsmottagarens betaltjänstleverantör. Betalaren kan när som helst begära att få tillgång till eller rättelse av personuppgifterna genom att kontakta betalarens betaltjänstleverantör. Ytterligare information om behandling av personuppgifter i samband med betalningar kan finnas i villkoren för kontot och i avtalet med betalningsmottagaren. Betalaren kan när som helst återkalla sitt samtycke, vilket medför att tjänsten i sin helhet avslutas.</p>
+<p class="bg-copyright">© Bankgirocentralen BGC AB 2023. All rights reserved.</p>
 </div>
 <div class="flow-actions final-actions">
 <button type="button" class="flow-back btn btn-default">Tillbaka</button>
@@ -176,6 +185,7 @@
 <button type="button" class="btn btn-primary email-autogiro">Skicka via e-post</button>
 <button type="submit" class="btn btn-primary">Skicka anmälan till SIKF</button>
 </div>
+<p class="bg-official-link"><a href="docs/bankgirot-autogiro-medgivande-till-kontonummer.pdf" target="_blank" rel="noopener">Öppna Bankgirots originalblankett</a></p>
 <a class="cancel-payment" href="stod-oss.html">Avbryt anmälan</a>
 </section>
 </form>
@@ -493,7 +503,7 @@
     var open = clone.querySelector('.signature-open');
     if (open) open.parentNode.removeChild(open);
     return '<!doctype html><html lang="sv"><head><meta charset="utf-8"><title>Autogiroanmälan SIKF</title><style>' +
-      '@page{size:A4 portrait;margin:12mm}*{box-sizing:border-box}body{font-family:Arial,sans-serif;color:#111;margin:0}.autogiro-preview{border:0;margin:0;padding:0}.autogiro-head{border-bottom:2px solid #111;margin-bottom:10px;padding-bottom:8px}.autogiro-head strong{display:block;font-size:22px;font-weight:900}.autogiro-head span{display:block;font-size:16px;font-weight:800}.autogiro-grid{display:grid;gap:10px;grid-template-columns:1fr 1fr}.autogiro-box{border:1px solid #222;padding:10px;break-inside:avoid}.autogiro-box h4{font-size:15px;margin:0 0 8px}.autogiro-box p{border-bottom:1px solid #bbb;font-size:12px;line-height:1.25;margin:0 0 6px;min-height:20px;padding-bottom:4px}.autogiro-full{margin-top:10px}.autogiro-full p{border-bottom:0;font-size:12px;line-height:1.35}.autogiro-signature{display:grid;gap:10px;grid-template-columns:1fr 1fr;margin-top:10px}.autogiro-signature div{border:1px solid #222;min-height:72px;padding:8px}.autogiro-signature span{display:block;font-size:12px;font-weight:800;margin-bottom:8px}.signature-preview{border-bottom:1px solid #777;min-height:46px}.signature-preview img{display:block;max-height:44px;max-width:100%;object-fit:contain;object-position:left bottom}.signature-open,.signature-clear{display:none}' +
+      '@page{size:A4 portrait;margin:11mm}*{box-sizing:border-box}body{color:#111;font-family:Georgia,\"Times New Roman\",serif;margin:0}.bg-autogiro-form{border:0;margin:0;padding:0}.bg-form-top{align-items:flex-start;display:flex;justify-content:space-between;margin-bottom:17px}.bankgirot-logo{align-items:center;color:#9f2a55;display:flex;font-weight:700;margin-bottom:7px}.bankgirot-mark{align-items:center;background:#9f2a55;border-radius:2px;color:#fff;display:inline-flex;font-size:15px;height:23px;justify-content:center;line-height:1;margin-right:4px;width:19px}.bankgirot-word{font-size:25px}.bg-form-top p{color:#333;font-size:11px;line-height:1.2;margin:0}.bg-form-top h3{color:#333;font-family:Arial,sans-serif;font-size:18px;font-weight:800;line-height:1.15;margin:6px 0 0;text-align:right}.bg-form-columns,.bg-form-lower{display:grid;gap:18px;grid-template-columns:1fr 1fr}.bg-column h4,.bg-mandate-text h4{color:#333;font-family:Arial,sans-serif;font-size:13px;font-weight:800;margin:0 0 6px}.bg-field{border:1px solid #777;border-bottom:0;min-height:34px;padding:2px 6px 4px}.bg-field:last-of-type{border-bottom:1px solid #777}.bg-field-tall{min-height:56px}.bg-field label{color:#555;display:block;font-size:9.5px;font-weight:700;line-height:1.05;margin:0 0 2px}.bg-field span,.bg-field strong{color:#111;display:block;font-size:12px;font-weight:400;line-height:1.2;min-height:14px}.bg-field strong{font-weight:700}.bg-required{color:#333;font-size:10px;line-height:1.1;margin:5px 0 0}.bg-clearing-note{color:#333;font-size:8px;line-height:1.08;margin:8px 0 0}.bg-form-lower{align-items:start;margin-top:18px}.bg-mandate-text p{color:#222;font-size:12px;line-height:1.18;margin:0}.bg-signature-field{min-height:78px}.signature-preview{border-bottom:1px solid #777;min-height:39px}.signature-preview img{display:block;max-height:37px;max-width:100%;object-fit:contain;object-position:left bottom}.signature-preview em,.signature-open,.signature-clear{display:none}.bg-privacy-text{color:#333;font-size:10px;line-height:1.08;margin:20px 0 0}.bg-copyright{color:#555;font-size:8px;margin:34px 0 0}' +
       '</style></head><body>' + clone.outerHTML + '</body></html>';
   }
 
