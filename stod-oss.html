@@ -137,10 +137,17 @@
 <section class="donor-step" data-step="5">
 <h3>5. Autogiroblankett</h3>
 <p class="helper-note">Kontrollera uppgifterna, tryck på Underskriv och skicka sedan blanketten till SIKF. Föreningen skickar underlaget vidare enligt bankens rutin.</p>
+<div class="signature-callout"><strong>Underskrift krävs</strong><span>Tryck på knappen <b>Underskriv</b>, skriv din signatur och spara den innan du skriver ut eller skickar blanketten.</span></div>
 <div class="autogiro-preview bg-autogiro-form" id="autogiro-preview">
 <div class="bg-form-top">
 <div>
-<div class="bankgirot-logo" aria-label="Bankgirot"><span class="bankgirot-mark">bg</span><span class="bankgirot-word">bankgirot</span></div>
+<div class="bankgirot-logo" aria-label="Bankgirot">
+<svg class="bankgirot-logo-svg" viewBox="0 0 238 48" role="img" aria-label="Bankgirot">
+<rect x="0" y="4" width="30" height="38" rx="3" fill="#a31945"></rect>
+<text x="4" y="33" fill="#fff" font-family="Georgia, 'Times New Roman', serif" font-size="27" font-weight="700">bg</text>
+<text x="36" y="34" fill="#a31945" font-family="Georgia, 'Times New Roman', serif" font-size="37" font-weight="700">bankgirot</text>
+</svg>
+</div>
 <p>Ifylld och underskriven blankett skickas till betalningsmottagaren.<br>Notera: Blanketter som skickas till Bankgirot kommer inte att hanteras.</p>
 </div>
 <h3>Autogiroanmälan,<br>medgivande till kontonummer</h3>
@@ -172,7 +179,7 @@
 </div>
 <div class="bg-signature-fields">
 <div class="bg-field"><label>Ort och datum*</label><strong data-ag="placeDate"></strong></div>
-<div class="bg-field bg-signature-field signature-box"><label>Betalarens underskrift*</label><div class="signature-preview"><img id="signature-preview-image" alt="Betalarens underskrift" hidden><em data-signature-status>Inte underskriven ännu</em></div><button type="button" class="btn btn-default signature-open">Underskriv</button></div>
+<div class="bg-field bg-signature-field signature-box signature-missing"><label>Betalarens underskrift*</label><div class="signature-preview"><img id="signature-preview-image" alt="Betalarens underskrift" hidden><em data-signature-status>Underskrift saknas</em></div><button type="button" class="btn btn-primary signature-open">Underskriv här</button></div>
 </div>
 </div>
 <p class="bg-privacy-text">Betalaren samtycker till att behandling av personuppgifter som lämnats i detta medgivande behandlas av betalarens betaltjänstleverantör, betalningsmottagaren, betalningsmottagarens betaltjänstleverantör och Bankgirocentralen BGC AB för administration av tjänsten. Personuppgiftsansvariga för denna personuppgiftsbehandling är betalarens betaltjänstleverantör, betalningsmottagaren samt betalningsmottagarens betaltjänstleverantör. Betalaren kan när som helst begära att få tillgång till eller rättelse av personuppgifterna genom att kontakta betalarens betaltjänstleverantör. Ytterligare information om behandling av personuppgifter i samband med betalningar kan finnas i villkoren för kontot och i avtalet med betalningsmottagaren. Betalaren kan när som helst återkalla sitt samtycke, vilket medför att tjänsten i sin helhet avslutas.</p>
@@ -181,7 +188,7 @@
 <div class="flow-actions final-actions">
 <button type="button" class="flow-back btn btn-default">Tillbaka</button>
 <button type="button" class="btn btn-default print-autogiro">Skriv ut blankett</button>
-<button type="button" class="btn btn-default download-autogiro">Ladda ner blankett</button>
+<button type="button" class="btn btn-default download-autogiro">Ladda ner PDF</button>
 <button type="button" class="btn btn-primary email-autogiro">Skicka via e-post</button>
 <button type="submit" class="btn btn-primary">Skicka anmälan till SIKF</button>
 </div>
@@ -263,6 +270,8 @@
 <script src="js/qrcode.min.js"></script>
 <script src="js/sikf-swish.js"></script>
 <script src="js/sikf-forms.js"></script>
+<script src="js/vendor/html2canvas.min.js"></script>
+<script src="js/vendor/jspdf.umd.min.js"></script>
 <script>
 (function () {
   var form = document.getElementById('donor-flow');
@@ -290,6 +299,7 @@
   var signatureSave = signatureModal ? signatureModal.querySelector('.signature-save') : null;
   var signaturePreview = document.getElementById('signature-preview-image');
   var signatureStatus = form.querySelector('[data-signature-status]');
+  var signatureBox = form.querySelector('.signature-box');
   var signatureHasInk = false;
   var signatureImage = '';
   var resizeSignatureCanvas = function () {};
@@ -456,10 +466,19 @@
       signaturePreview.src = signatureImage;
       signaturePreview.hidden = false;
       signatureStatus.hidden = true;
+      if (signatureBox) {
+        signatureBox.classList.add('is-signed');
+        signatureBox.classList.remove('signature-missing');
+      }
     } else {
+      signaturePreview.removeAttribute('src');
       signaturePreview.hidden = true;
       signatureStatus.hidden = false;
-      signatureStatus.textContent = 'Inte underskriven ännu';
+      signatureStatus.textContent = 'Underskrift saknas';
+      if (signatureBox) {
+        signatureBox.classList.remove('is-signed');
+        signatureBox.classList.add('signature-missing');
+      }
     }
   }
 
@@ -503,14 +522,26 @@
     var open = clone.querySelector('.signature-open');
     if (open) open.parentNode.removeChild(open);
     return '<!doctype html><html lang="sv"><head><meta charset="utf-8"><title>Autogiroanmälan SIKF</title><style>' +
-      '@page{size:A4 portrait;margin:11mm}*{box-sizing:border-box}body{color:#111;font-family:Georgia,\"Times New Roman\",serif;margin:0}.bg-autogiro-form{border:0;margin:0;padding:0}.bg-form-top{align-items:flex-start;display:flex;justify-content:space-between;margin-bottom:17px}.bankgirot-logo{align-items:center;color:#9f2a55;display:flex;font-weight:700;margin-bottom:7px}.bankgirot-mark{align-items:center;background:#9f2a55;border-radius:2px;color:#fff;display:inline-flex;font-size:15px;height:23px;justify-content:center;line-height:1;margin-right:4px;width:19px}.bankgirot-word{font-size:25px}.bg-form-top p{color:#333;font-size:11px;line-height:1.2;margin:0}.bg-form-top h3{color:#333;font-family:Arial,sans-serif;font-size:18px;font-weight:800;line-height:1.15;margin:6px 0 0;text-align:right}.bg-form-columns,.bg-form-lower{display:grid;gap:18px;grid-template-columns:1fr 1fr}.bg-column h4,.bg-mandate-text h4{color:#333;font-family:Arial,sans-serif;font-size:13px;font-weight:800;margin:0 0 6px}.bg-field{border:1px solid #777;border-bottom:0;min-height:34px;padding:2px 6px 4px}.bg-field:last-of-type{border-bottom:1px solid #777}.bg-field-tall{min-height:56px}.bg-field label{color:#555;display:block;font-size:9.5px;font-weight:700;line-height:1.05;margin:0 0 2px}.bg-field span,.bg-field strong{color:#111;display:block;font-size:12px;font-weight:400;line-height:1.2;min-height:14px}.bg-field strong{font-weight:700}.bg-required{color:#333;font-size:10px;line-height:1.1;margin:5px 0 0}.bg-clearing-note{color:#333;font-size:8px;line-height:1.08;margin:8px 0 0}.bg-form-lower{align-items:start;margin-top:18px}.bg-mandate-text p{color:#222;font-size:12px;line-height:1.18;margin:0}.bg-signature-field{min-height:78px}.signature-preview{border-bottom:1px solid #777;min-height:39px}.signature-preview img{display:block;max-height:37px;max-width:100%;object-fit:contain;object-position:left bottom}.signature-preview em,.signature-open,.signature-clear{display:none}.bg-privacy-text{color:#333;font-size:10px;line-height:1.08;margin:20px 0 0}.bg-copyright{color:#555;font-size:8px;margin:34px 0 0}' +
+      '@page{size:A4 portrait;margin:11mm}*{box-sizing:border-box}body{color:#111;font-family:Georgia,\"Times New Roman\",serif;margin:0}.bg-autogiro-form{border:0;margin:0;padding:0}.bg-form-top{align-items:flex-start;display:flex;justify-content:space-between;margin-bottom:17px}.bankgirot-logo{align-items:center;display:flex;margin-bottom:7px}.bankgirot-logo-svg{display:block;height:auto;width:150px}.bg-form-top p{color:#333;font-size:11px;line-height:1.2;margin:0}.bg-form-top h3{color:#333;font-family:Arial,sans-serif;font-size:18px;font-weight:800;line-height:1.15;margin:6px 0 0;text-align:right}.bg-form-columns,.bg-form-lower{display:grid;gap:18px;grid-template-columns:1fr 1fr}.bg-column h4,.bg-mandate-text h4{color:#333;font-family:Arial,sans-serif;font-size:13px;font-weight:800;margin:0 0 6px}.bg-field{border:1px solid #777;border-bottom:0;min-height:34px;padding:2px 6px 4px}.bg-field:last-of-type{border-bottom:1px solid #777}.bg-field-tall{min-height:56px}.bg-field label{color:#555;display:block;font-size:9.5px;font-weight:700;line-height:1.05;margin:0 0 2px}.bg-field span,.bg-field strong{color:#111;display:block;font-size:12px;font-weight:400;line-height:1.2;min-height:14px}.bg-field strong{font-weight:700}.bg-required{color:#333;font-size:10px;line-height:1.1;margin:5px 0 0}.bg-clearing-note{color:#333;font-size:8px;line-height:1.08;margin:8px 0 0}.bg-form-lower{align-items:start;margin-top:18px}.bg-mandate-text p{color:#222;font-size:12px;line-height:1.18;margin:0}.bg-signature-field{min-height:78px}.signature-preview{border-bottom:1px solid #777;min-height:39px}.signature-preview img{display:block;max-height:37px;max-width:100%;object-fit:contain;object-position:left bottom}.signature-preview em,.signature-open,.signature-clear{display:none}.bg-privacy-text{color:#333;font-size:10px;line-height:1.08;margin:20px 0 0}.bg-copyright{color:#555;font-size:8px;margin:34px 0 0}' +
       '</style></head><body>' + clone.outerHTML + '</body></html>';
   }
 
   function requireSignature() {
     if (signatureImage) return true;
-    alert('Tryck på Underskriv och spara din underskrift först.');
+    if (signatureBox) {
+      signatureBox.classList.add('signature-attention');
+      setTimeout(function () { signatureBox.classList.remove('signature-attention'); }, 1400);
+    }
+    alert('Underskrift krävs. Tryck på "Underskriv här", skriv din signatur och spara den först.');
     return false;
+  }
+
+  function fileSafeName() {
+    return ([formValue('first_name'), formValue('last_name')]
+      .filter(Boolean)
+      .join('-')
+      .toLowerCase()
+      .replace(/[^a-z0-9-]+/g, '-') || 'blankett');
   }
 
   function printAutogiro() {
@@ -535,22 +566,58 @@
 
   function downloadAutogiro() {
     updateSummary();
-    if (!requireSignature()) return false;
-    var blob = new Blob([printableHtml()], { type: 'text/html;charset=utf-8' });
-    var url = URL.createObjectURL(blob);
-    var link = document.createElement('a');
-    var name = [formValue('first_name'), formValue('last_name')].filter(Boolean).join('-').toLowerCase() || 'blankett';
-    link.href = url;
-    link.download = 'sikf-autogiro-' + name + '.html';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
-    return true;
+    if (!requireSignature()) return Promise.resolve(false);
+    if (!window.html2canvas || !window.jspdf || !window.jspdf.jsPDF) {
+      alert('PDF-exporten kunde inte laddas. Använd "Skriv ut blankett" och välj Spara som PDF.');
+      printAutogiro();
+      return Promise.resolve(false);
+    }
+
+    var target = document.getElementById('autogiro-preview');
+    var button = form.querySelector('.download-autogiro');
+    if (button) {
+      button.dataset.originalLabel = button.textContent;
+      button.textContent = 'Skapar PDF...';
+      button.disabled = true;
+    }
+    document.body.classList.add('is-exporting-autogiro');
+
+    return window.html2canvas(target, {
+      backgroundColor: '#ffffff',
+      scale: 2.4,
+      useCORS: true
+    }).then(function (canvas) {
+      var pdf = new window.jspdf.jsPDF('p', 'mm', 'a4');
+      var pageWidth = 210;
+      var pageHeight = 297;
+      var imgWidth = pageWidth - 18;
+      var imgHeight = canvas.height * imgWidth / canvas.width;
+      var x = (pageWidth - imgWidth) / 2;
+      var y = 8;
+      if (imgHeight > pageHeight - 14) {
+        imgHeight = pageHeight - 14;
+        imgWidth = canvas.width * imgHeight / canvas.height;
+        x = (pageWidth - imgWidth) / 2;
+      }
+      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', x, y, imgWidth, imgHeight);
+      pdf.save('sikf-autogiro-' + fileSafeName() + '.pdf');
+      return true;
+    }).catch(function () {
+      alert('PDF kunde inte skapas automatiskt. Använd "Skriv ut blankett" och välj Spara som PDF.');
+      return false;
+    }).then(function (ok) {
+      document.body.classList.remove('is-exporting-autogiro');
+      if (button) {
+        button.disabled = false;
+        button.textContent = button.dataset.originalLabel || 'Ladda ner PDF';
+      }
+      return ok;
+    });
   }
 
   function emailAutogiro() {
-    if (!downloadAutogiro()) return;
+    downloadAutogiro().then(function (downloaded) {
+      if (!downloaded) return;
     var fullName = [formValue('first_name'), formValue('last_name')].filter(Boolean).join(' ');
     var body = [
       'Assalamu alaykum SIKF,',
@@ -562,10 +629,11 @@
       'Belopp: ' + amount + ' kr/månad',
       'Bank: ' + formValue('bank'),
       '',
-      'Jag bifogar den signerade blanketten som laddades ner från hemsidan.',
+      'Jag bifogar den signerade PDF-blanketten som laddades ner från hemsidan.',
       ''
     ].join('\n');
     window.location.href = 'mailto:sikforening@gmail.com?subject=' + encodeURIComponent('Autogiroanmälan SIKF - ' + fullName) + '&body=' + encodeURIComponent(body);
+    });
   }
 
   Array.prototype.forEach.call(form.querySelectorAll('.amount-choice'), function (button) {

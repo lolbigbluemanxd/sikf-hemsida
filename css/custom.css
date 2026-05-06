@@ -1182,30 +1182,14 @@ a,
 
 .bankgirot-logo {
   align-items: center;
-  color: #9f2a55;
   display: flex;
-  font-family: Georgia, "Times New Roman", serif;
-  font-weight: 700;
   margin-bottom: 10px;
 }
 
-.bankgirot-mark {
-  align-items: center;
-  background: #9f2a55;
-  border-radius: 2px;
-  color: #fff;
-  display: inline-flex;
-  font-size: 19px;
-  height: 30px;
-  justify-content: center;
-  line-height: 1;
-  margin-right: 5px;
-  width: 24px;
-}
-
-.bankgirot-word {
-  font-size: 32px;
-  letter-spacing: 0;
+.bankgirot-logo-svg {
+  display: block;
+  height: auto;
+  width: 210px;
 }
 
 .bg-form-top p {
@@ -1310,6 +1294,33 @@ a,
   min-height: 96px;
 }
 
+.signature-callout {
+  align-items: center;
+  background: #fff5da;
+  border: 2px solid #d59600;
+  border-radius: 6px;
+  color: #2b2110;
+  display: flex;
+  gap: 14px;
+  margin: 0 0 16px;
+  padding: 14px 16px;
+}
+
+.signature-callout strong {
+  background: #d59600;
+  border-radius: 4px;
+  color: #111;
+  flex: 0 0 auto;
+  font-size: 16px;
+  font-weight: 900;
+  padding: 7px 10px;
+}
+
+.signature-callout span {
+  font-size: 16px;
+  line-height: 1.35;
+}
+
 .bg-privacy-text {
   color: #333;
   font-size: 13px;
@@ -1325,6 +1336,21 @@ a,
 
 .signature-box {
   position: relative;
+}
+
+.signature-box.signature-missing {
+  background: #fff9e8;
+  outline: 3px solid #d59600;
+  outline-offset: -3px;
+}
+
+.signature-box.signature-attention {
+  animation: signaturePulse 0.7s ease-in-out 2;
+}
+
+.signature-box.is-signed {
+  background: #fff;
+  outline: 0;
 }
 
 .signature-preview {
@@ -1343,13 +1369,19 @@ a,
   object-position: left bottom;
 }
 
+.signature-preview img[hidden] {
+  display: none !important;
+}
+
 .signature-preview em {
-  color: #666;
-  font-size: 13px;
+  color: #9c2f12;
+  font-size: 14px;
+  font-weight: 900;
 }
 
 .signature-open {
-  padding: 6px 16px;
+  font-weight: 900;
+  padding: 8px 18px;
 }
 
 .signature-modal[hidden] {
@@ -1432,6 +1464,21 @@ body.signature-modal-open {
   font-weight: 800;
 }
 
+body.is-exporting-autogiro .signature-open,
+body.is-exporting-autogiro .signature-clear,
+body.is-exporting-autogiro [data-signature-status],
+body.is-exporting-autogiro .signature-callout,
+body.is-exporting-autogiro .flow-actions,
+body.is-exporting-autogiro .bg-official-link,
+body.is-exporting-autogiro .cancel-payment {
+  display: none !important;
+}
+
+body.is-exporting-autogiro .signature-box {
+  background: #fff !important;
+  outline: 0 !important;
+}
+
 .email-autogiro {
   font-weight: 800;
 }
@@ -1456,6 +1503,12 @@ body.signature-modal-open {
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+@keyframes signaturePulse {
+  0% { box-shadow: 0 0 0 0 rgba(213, 150, 0, 0.8); }
+  70% { box-shadow: 0 0 0 12px rgba(213, 150, 0, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(213, 150, 0, 0); }
 }
 
 .support-note {
