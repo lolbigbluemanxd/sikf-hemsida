@@ -1677,7 +1677,7 @@ body.is-exporting-autogiro .pdf-export-form .signature-preview {
   padding: 0;
 }
 
-.sikf-footer-main ul > li {
+#footer .sikf-footer-main ul > li {
   display: block;
   margin-left: 0;
 }
@@ -1687,7 +1687,7 @@ body.is-exporting-autogiro .pdf-export-form .signature-preview {
   margin-bottom: 10px;
 }
 
-.sikf-footer-contact li {
+#footer .sikf-footer-contact li {
   align-items: flex-start;
   display: flex;
   gap: 10px;
@@ -1737,7 +1737,8 @@ body.is-exporting-autogiro .pdf-export-form .signature-preview {
   justify-content: flex-end;
 }
 
-.sikf-footer-mini > li {
+#footer .sikf-footer-mini > li {
+  display: block;
   margin-left: 0;
 }
 
