@@ -6,6 +6,7 @@
   var form = document.getElementById('donor-flow');
   if (!form) return;
 
+  var MIN_MONTHLY_AMOUNT = 100;
   var currentStep = 1;
   var amount = 150;
   var amountInput = document.getElementById('amount-input');
@@ -459,8 +460,8 @@
 
   Array.prototype.forEach.call(form.querySelectorAll('.flow-next'), function (button) {
     button.addEventListener('click', function () {
-      if (currentStep === 1 && amount < 1) {
-        alert('Välj eller ange ett belopp.');
+      if (currentStep === 1 && amount < MIN_MONTHLY_AMOUNT) {
+        alert('Minsta månadsbelopp är ' + MIN_MONTHLY_AMOUNT + ' kr.');
         return;
       }
       if (currentStep === 2 && (!formValue('first_name') || !formValue('last_name') || !formValue('email'))) {
@@ -611,7 +612,7 @@
     if (draft.amount) {
       var n = Number(draft.amount);
       if (n > 0) {
-        var presets = ['50', '150', '300', '500'];
+        var presets = ['100', '150', '300', '500'];
         Array.prototype.forEach.call(form.querySelectorAll('.amount-choice'), function (b) { b.classList.remove('active'); });
         if (presets.indexOf(String(n)) !== -1) {
           var btn = form.querySelector('.amount-choice[data-amount="' + n + '"]');

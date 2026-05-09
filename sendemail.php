@@ -574,7 +574,7 @@ $bankAccount = clean_string($_POST['bank_account'] ?? '', 80);
 $signaturePlaceDate = clean_string($_POST['signature_place_date'] ?? '', 120);
 $amountRaw = clean_string($_POST['amount'] ?? '', 12);
 $amount = filter_var($amountRaw, FILTER_VALIDATE_INT, [
-    'options' => ['min_range' => 1, 'max_range' => 50000],
+    'options' => ['min_range' => 100, 'max_range' => 50000],
 ]);
 $attachment = autogiro_pdf_attachment(
     $_POST['autogiro_pdf'] ?? '',
@@ -587,7 +587,7 @@ if ($isDonor) {
         json_response(false, 'Fyll i förnamn och efternamn.', 422);
     }
     if ($amount === false) {
-        json_response(false, 'Ange ett giltigt månadsbelopp.', 422);
+        json_response(false, 'Ange ett giltigt månadsbelopp på minst 100 kr.', 422);
     }
     if (empty($_POST['consent'])) {
         json_response(false, 'Du behöver godkänna att SIK kontaktar dig.', 422);

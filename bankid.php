@@ -181,11 +181,11 @@ $email = bankid_clean($data['email'] ?? '', 254);
 $firstName = bankid_clean($data['first_name'] ?? '', 80);
 $lastName = bankid_clean($data['last_name'] ?? '', 80);
 $amount = filter_var(bankid_clean($data['amount'] ?? '', 12), FILTER_VALIDATE_INT, [
-    'options' => ['min_range' => 1, 'max_range' => 50000],
+    'options' => ['min_range' => 100, 'max_range' => 50000],
 ]);
 
 if (!filter_var($email, FILTER_VALIDATE_EMAIL) || $firstName === '' || $lastName === '' || $amount === false) {
-    bankid_json(false, 'Fyll i namn, e-post och giltigt månadsbelopp innan BankID startas.', 422);
+    bankid_json(false, 'Fyll i namn, e-post och ett månadsbelopp på minst 100 kr innan BankID startas.', 422);
 }
 
 if (empty($config['bankid_enabled'])) {
