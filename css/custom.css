@@ -645,6 +645,118 @@ a,
   color: #7a1f1a;
 }
 
+/* Inline field-level error labels rendered by sik-forms.js */
+.sik-field-error {
+  color: #b51e1e;
+  font-size: 13px;
+  font-weight: 600;
+  margin: 6px 0 0;
+}
+[data-sik-field-error] {
+  border-color: #c0392b !important;
+  box-shadow: 0 0 0 2px rgba(192, 57, 43, 0.15);
+}
+
+/* Cloudflare Turnstile widget container */
+.sik-turnstile-slot {
+  margin: 16px 0;
+  min-height: 65px;
+}
+.sik-turnstile-slot:empty {
+  display: none;
+}
+
+/* Skip-to-content link (accessibility) */
+.sik-skip-link {
+  background: var(--sik-green-dark);
+  color: #fff;
+  font-weight: 700;
+  left: 6px;
+  padding: 10px 14px;
+  position: absolute;
+  top: -100px;
+  transition: top 0.2s ease;
+  z-index: 9999;
+}
+.sik-skip-link:focus {
+  top: 6px;
+  color: #fff;
+  text-decoration: none;
+  outline: 3px solid var(--sik-gold);
+}
+
+/* Maps consent overlay */
+.sik-maps-consent {
+  align-items: center;
+  background: var(--sik-soft);
+  border: 1px solid #d6dcd8;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  justify-content: center;
+  min-height: 280px;
+  padding: 28px;
+  text-align: center;
+}
+.sik-maps-consent p {
+  color: var(--sik-ink);
+  margin: 0 0 8px;
+  max-width: 460px;
+}
+.sik-maps-consent .btn {
+  align-self: center;
+}
+
+/* Donor draft notice */
+.sik-draft-notice {
+  align-items: center;
+  background: #fff8e1;
+  border: 1px solid #f0d066;
+  border-radius: 6px;
+  color: #6a4c10;
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 14px;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding: 10px 14px;
+}
+.sik-draft-notice button {
+  background: transparent;
+  border: 1px solid #6a4c10;
+  border-radius: 4px;
+  color: #6a4c10;
+  cursor: pointer;
+  font-weight: 600;
+  padding: 4px 10px;
+}
+.sik-draft-notice button:hover {
+  background: #6a4c10;
+  color: #fff;
+}
+
+/* Weekly prayer overview */
+.weekly-prayer-table {
+  margin-top: 18px;
+}
+.weekly-prayer-table table {
+  font-size: 14px;
+  width: 100%;
+}
+.weekly-prayer-table th {
+  background: var(--sik-soft);
+  color: var(--sik-green-dark);
+  text-align: left;
+}
+.weekly-prayer-table tr.is-today {
+  background: #fff8e1;
+  font-weight: 700;
+}
+.weekly-prayer-toggle {
+  margin-top: 14px;
+}
+
 @media (max-width: 767px) {
   .sik-swish-widget {
     grid-template-columns: 1fr;

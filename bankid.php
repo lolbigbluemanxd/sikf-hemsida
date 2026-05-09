@@ -34,6 +34,9 @@ $defaultConfig = [
     'bankid_provider_cancel_url' => '',
     'bankid_api_key' => '',
     'bankid_timeout_seconds' => 120,
+    'rate_limit_dir' => __DIR__ . '/storage/rate_limit',
+    'bankid_rate_limit_count' => 20,
+    'bankid_rate_limit_window_seconds' => 900,
 ];
 
 $configPath = __DIR__ . '/config.php';
@@ -99,6 +102,38 @@ function bankid_request_data(): array
     return $_POST;
 }
 
+function bankid_rate_limit(array $config): void
+{
+    $limit = max(1, (int) ($config['bankid_rate_limit_count'] ?? 20));
+    $window = max(60, (int) ($config['bankid_rate_limit_window_seconds'] ?? 900));
+    $dir = (string) ($config['rate_limit_dir'] ?? (__DIR__ . '/storage/rate_limit'));
+
+    if (!is_dir($dir) && !@mkdir($dir, 0750, true) && !is_dir($dir)) {
+        bankid_json(false, 'BankID-skyddet kunde inte startas. Försök igen senare.', 503);
+    }
+
+    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    $ua = $_SERVER['HTTP_USER_AGENT'] ?? '';
+    $key = hash('sha256', 'bankid|' . $ip . '|' . substr($ua, 0, 120));
+    $path = rtrim($dir, '/\\') . DIRECTORY_SEPARATOR . 'bankid-' . $key . '.json';
+    $now = time();
+    $hits = [];
+
+    if (is_file($path)) {
+        $stored = json_decode((string) @file_get_contents($path), true);
+        if (is_array($stored)) {
+            $hits = array_values(array_filter($stored, static fn($ts) => is_int($ts) && $ts > ($now - $window)));
+        }
+    }
+
+    if (count($hits) >= $limit) {
+        bankid_json(false, 'För många BankID-försök. Vänta en stund och försök igen.', 429);
+    }
+
+    $hits[] = $now;
+    @file_put_contents($path, json_encode($hits), LOCK_EX);
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     bankid_json(true, 'BankID-token hämtad.', 200, [
         'csrf_token' => bankid_csrf_token(),
@@ -114,6 +149,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 if (!bankid_same_origin()) {
     bankid_json(false, 'Ogiltig BankID-förfrågan.', 403);
 }
+
+bankid_rate_limit($config);
 
 $data = bankid_request_data();
 $postedToken = bankid_clean($data['csrf_token'] ?? '', 128);

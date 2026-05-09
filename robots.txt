@@ -1,0 +1,15 @@
+User-agent: *
+Disallow: /storage/
+Disallow: /backups/
+Disallow: /research/
+Disallow: /tmp/
+Disallow: /docs/
+Disallow: /sendemail.php
+Disallow: /bankid.php
+Disallow: /admin.php
+Disallow: /storage_cleanup.php
+Disallow: /dev-router.php
+Disallow: /config.php
+Disallow: /config.example.php
+
+Sitemap: https://sikforening.se/sitemap.xml

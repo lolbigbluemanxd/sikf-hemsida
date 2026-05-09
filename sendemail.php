@@ -32,14 +32,19 @@ header('Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
 $defaultConfig = [
-    'email_to' => 'Mussamahad@gmail.com',
-    'from_email' => 'no-reply@example.com',
+    'email_to' => '',
+    'from_email' => 'no-reply@sikforening.se',
     'from_name' => 'SIK Hemsida',
     'max_message_length' => 3000,
     'max_attachment_bytes' => 6000000,
+    'max_signature_bytes' => 750000,
     'email_enabled' => false,
     'save_autogiro_pdf' => true,
     'saved_documents_dir' => __DIR__ . '/storage/autogiro_documents',
+    'storage_encrypt_documents' => true,
+    'storage_encryption_key' => getenv('SIK_STORAGE_KEY') ?: '',
+    'storage_retention_days' => 2555,
+    'log_retention_days' => 90,
     'rate_limit_count' => 5,
     'rate_limit_window_seconds' => 900,
     'smtp_enabled' => false,
@@ -49,6 +54,9 @@ $defaultConfig = [
     'smtp_password' => '',
     'smtp_encryption' => 'tls',
     'smtp_timeout_seconds' => 15,
+    'turnstile_enabled' => false,
+    'turnstile_site_key' => '',
+    'turnstile_secret_key' => '',
 ];
 
 $configPath = __DIR__ . '/config.php';
@@ -131,6 +139,118 @@ function autogiro_pdf_attachment(?string $dataUri, ?string $filename, int $maxBy
     ];
 }
 
+function validate_signature_data(?string $dataUri, int $maxBytes): void
+{
+    $dataUri = trim((string) $dataUri);
+    if ($dataUri === '') {
+        json_response(false, 'Underskrift saknas.', 422);
+    }
+    if (!preg_match('/^data:image\/png;base64,([A-Za-z0-9+\/=\s]+)$/i', $dataUri, $matches)) {
+        json_response(false, 'Underskriften har fel format.', 422);
+    }
+    $base64 = preg_replace('/\s+/', '', $matches[1]) ?? '';
+    if (strlen($base64) > (int) ceil($maxBytes * 1.4)) {
+        json_response(false, 'Underskriften är för stor.', 413);
+    }
+    $binary = base64_decode($base64, true);
+    if ($binary === false || strlen($binary) > $maxBytes || substr($binary, 0, 8) !== "\x89PNG\r\n\x1a\n") {
+        json_response(false, 'Underskriften kunde inte läsas.', 422);
+    }
+}
+
+function normalized_personal_number(string $personalNumber): string
+{
+    $digits = preg_replace('/\D+/', '', $personalNumber) ?? '';
+    if (strlen($digits) === 12) {
+        $digits = substr($digits, 2);
+    }
+    return $digits;
+}
+
+function luhn_valid(string $digits): bool
+{
+    $sum = 0;
+    $length = strlen($digits);
+    for ($i = 0; $i < $length; $i++) {
+        $n = (int) $digits[$i];
+        if (($length - $i) % 2 === 0) {
+            $n *= 2;
+            if ($n > 9) {
+                $n -= 9;
+            }
+        }
+        $sum += $n;
+    }
+    return $sum > 0 && $sum % 10 === 0;
+}
+
+function valid_swedish_personal_number(string $personalNumber): bool
+{
+    if (!preg_match('/^[0-9]{6,8}[-+]?[0-9]{4}$/', $personalNumber)) {
+        return false;
+    }
+    $digits = normalized_personal_number($personalNumber);
+    return strlen($digits) === 10 && luhn_valid($digits);
+}
+
+function valid_bank_account(string $value): bool
+{
+    $value = trim($value);
+    if (!preg_match('/^[0-9][0-9\s-]{6,24}[0-9]$/', $value)) {
+        return false;
+    }
+    $digits = preg_replace('/\D+/', '', $value) ?? '';
+    return strlen($digits) >= 7 && strlen($digits) <= 18;
+}
+
+function storage_key(array $config): string
+{
+    $key = trim((string) ($config['storage_encryption_key'] ?? ''));
+    if ($key === '') {
+        $key = trim((string) getenv('SIK_STORAGE_KEY'));
+    }
+    if ($key === '') {
+        throw new RuntimeException('Storage encryption key is missing.');
+    }
+    if (stripos($key, 'base64:') === 0) {
+        $decoded = base64_decode(substr($key, 7), true);
+        if ($decoded !== false && strlen($decoded) >= 32) {
+            return substr($decoded, 0, 32);
+        }
+    }
+    if (preg_match('/^[A-Fa-f0-9]{64,}$/', $key)) {
+        $decoded = hex2bin(substr($key, 0, 64));
+        if ($decoded !== false) {
+            return $decoded;
+        }
+    }
+    return hash('sha256', $key, true);
+}
+
+function encrypt_document(string $content, array $config): string
+{
+    $iv = random_bytes(12);
+    $tag = '';
+    $cipherText = openssl_encrypt(
+        $content,
+        'aes-256-gcm',
+        storage_key($config),
+        OPENSSL_RAW_DATA,
+        $iv,
+        $tag
+    );
+    if ($cipherText === false) {
+        throw new RuntimeException('PDF document could not be encrypted.');
+    }
+    return json_encode([
+        'version' => 1,
+        'cipher' => 'aes-256-gcm',
+        'iv' => base64_encode($iv),
+        'tag' => base64_encode($tag),
+        'data' => base64_encode($cipherText),
+    ], JSON_UNESCAPED_SLASHES);
+}
+
 function ensure_private_directory(string $dir): void
 {
     if (!is_dir($dir) && !mkdir($dir, 0755, true) && !is_dir($dir)) {
@@ -148,16 +268,18 @@ function ensure_private_directory(string $dir): void
     }
 }
 
-function save_autogiro_document(array $attachment, array $meta, string $dir): string
+function save_autogiro_document(array $attachment, array $meta, string $dir, array $config): string
 {
     ensure_private_directory($dir);
 
     $datePrefix = date('Ymd-His');
     $random = bin2hex(random_bytes(4));
     $pdfName = safe_filename($datePrefix . '-' . $random . '-' . $attachment['filename'], 'autogiro.pdf');
-    $pdfPath = rtrim($dir, '/\\') . DIRECTORY_SEPARATOR . $pdfName;
+    $encrypt = !empty($config['storage_encrypt_documents']);
+    $pdfPath = rtrim($dir, '/\\') . DIRECTORY_SEPARATOR . ($encrypt ? $pdfName . '.enc' : $pdfName);
+    $content = $encrypt ? encrypt_document($attachment['content'], $config) : $attachment['content'];
 
-    if (file_put_contents($pdfPath, $attachment['content'], LOCK_EX) === false) {
+    if (file_put_contents($pdfPath, $content, LOCK_EX) === false) {
         throw new RuntimeException('PDF document could not be saved.');
     }
 
@@ -165,9 +287,11 @@ function save_autogiro_document(array $attachment, array $meta, string $dir): st
     $safeMeta = [
         'created_at' => date('c'),
         'filename' => $pdfName,
+        'stored_file' => basename($pdfPath),
+        'encrypted' => $encrypt,
         'name' => $meta['name'] ?? '',
-        'email' => $meta['email'] ?? '',
-        'phone' => $meta['phone'] ?? '',
+        'email_hash' => !empty($meta['email']) ? hash('sha256', strtolower((string) $meta['email'])) : '',
+        'phone_hash' => !empty($meta['phone']) ? hash('sha256', (string) $meta['phone']) : '',
         'amount' => $meta['amount'] ?? '',
         'bank' => $meta['bank'] ?? '',
         'place_date' => $meta['place_date'] ?? '',
@@ -253,6 +377,43 @@ function log_event(string $type, array $context = []): void
         json_encode($safeContext, JSON_UNESCAPED_UNICODE) . PHP_EOL,
         FILE_APPEND | LOCK_EX
     );
+}
+
+function verify_turnstile(array $config, string $token): bool
+{
+    if (empty($config['turnstile_enabled'])) {
+        return true;
+    }
+    $secret = trim((string) ($config['turnstile_secret_key'] ?? ''));
+    if ($secret === '') {
+        error_log('Turnstile is enabled but turnstile_secret_key is missing.');
+        return false;
+    }
+    if ($token === '') {
+        return false;
+    }
+
+    $payload = http_build_query([
+        'secret' => $secret,
+        'response' => $token,
+        'remoteip' => $_SERVER['REMOTE_ADDR'] ?? '',
+    ]);
+    $context = stream_context_create([
+        'http' => [
+            'method' => 'POST',
+            'header' => "Content-Type: application/x-www-form-urlencoded\r\n",
+            'content' => $payload,
+            'timeout' => 8,
+            'ignore_errors' => true,
+        ],
+    ]);
+    $response = @file_get_contents('https://challenges.cloudflare.com/turnstile/v0/siteverify', false, $context);
+    if ($response === false) {
+        error_log('Turnstile verify request failed.');
+        return false;
+    }
+    $decoded = json_decode($response, true);
+    return is_array($decoded) && !empty($decoded['success']);
 }
 
 function smtp_read_response($socket, array $expectedCodes): string
@@ -355,7 +516,11 @@ function send_smtp_mail(array $config, string $to, string $fromEmail, string $fr
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    json_response(true, 'CSRF-token hämtad.', 200, ['csrf_token' => csrf_token()]);
+    json_response(true, 'CSRF-token hämtad.', 200, [
+        'csrf_token' => csrf_token(),
+        'turnstile_enabled' => !empty($config['turnstile_enabled']),
+        'turnstile_site_key' => (string) ($config['turnstile_site_key'] ?? ''),
+    ]);
 }
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -376,6 +541,14 @@ if (!empty($_POST['botcheck']) || !empty($_POST['website'])) {
 $postedToken = clean_string($_POST['csrf_token'] ?? '', 128);
 if ($postedToken === '' || !hash_equals(csrf_token(), $postedToken)) {
     json_response(false, 'Säkerhetstoken saknas eller har gått ut. Uppdatera sidan och försök igen.', 403);
+}
+
+if (!empty($config['turnstile_enabled'])) {
+    $turnstileToken = clean_string($_POST['cf-turnstile-response'] ?? '', 2048);
+    if (!verify_turnstile($config, $turnstileToken)) {
+        log_event('turnstile_failed');
+        json_response(false, 'Bot-skyddet kunde inte verifiera dig. Försök igen.', 403);
+    }
 }
 
 $email = clean_string($_POST['email'] ?? '', 254);
@@ -419,15 +592,22 @@ if ($isDonor) {
     if (empty($_POST['consent'])) {
         json_response(false, 'Du behöver godkänna att SIK kontaktar dig.', 422);
     }
-    if ($personalNumber !== '' && !preg_match('/^[0-9]{6,8}[-+]?[0-9]{4}$/', $personalNumber)) {
-        json_response(false, 'Personnummer har fel format.', 422);
+    if ($personalNumber === '') {
+        json_response(false, 'Personnummer behövs för autogiroanmälan.', 422);
+    }
+    if (!valid_swedish_personal_number($personalNumber)) {
+        json_response(false, 'Personnumret är inte giltigt. Kontrollera siffrorna och försök igen.', 422);
     }
     if ($bank === '' || $bankAccount === '' || $signaturePlaceDate === '') {
         json_response(false, 'Fyll i bankuppgifter och ort/datum för autogiroanmälan.', 422);
     }
+    if (!valid_bank_account($bankAccount)) {
+        json_response(false, 'Clearing- och kontonumret har fel format. Kontrollera bankens uppgifter.', 422);
+    }
     if ($attachment === null) {
         json_response(false, 'Den ifyllda PDF-blanketten saknas. Försök igen eller ladda ner PDF och kontakta SIK.', 422);
     }
+    validate_signature_data($_POST['signature_data'] ?? '', (int) $config['max_signature_bytes']);
 } else {
     if ($name === '' || $subject === '' || $message === '') {
         json_response(false, 'Fyll i namn, ämne och meddelande.', 422);
@@ -466,7 +646,7 @@ if ($isDonor && $attachment !== null && !empty($config['save_autogiro_pdf'])) {
             'amount' => $amount !== false ? $amount . ' kr/månad' : '',
             'bank' => $bank,
             'place_date' => $signaturePlaceDate,
-        ], (string) $config['saved_documents_dir']);
+        ], (string) $config['saved_documents_dir'], $config);
     } catch (Throwable $e) {
         error_log($e->getMessage());
         json_response(false, 'PDF-blanketten kunde inte sparas. Kontrollera att storage-mappen är skrivbar.', 500);
@@ -487,8 +667,24 @@ if ($isDonor && $savedDocumentPath !== '' && empty($config['email_enabled'])) {
 }
 
 $fromName = clean_string((string) $config['from_name'], 80);
-$fromEmail = filter_var($config['from_email'], FILTER_VALIDATE_EMAIL) ? $config['from_email'] : 'no-reply@sikorening.se';
-$emailTo = filter_var($config['email_to'], FILTER_VALIDATE_EMAIL) ? $config['email_to'] : 'Mussamahad@gmail.com';
+$fromEmail = filter_var($config['from_email'], FILTER_VALIDATE_EMAIL) ? $config['from_email'] : 'no-reply@sikforening.se';
+$configuredEmailTo = trim((string) ($config['email_to'] ?? ''));
+if (!filter_var($configuredEmailTo, FILTER_VALIDATE_EMAIL)) {
+    error_log('SIK sendemail.php: email_to is missing or invalid in config.php — refusing to send.');
+    log_event($isDonor ? 'donor_form' : 'contact_form', [
+        'subject' => $subject,
+        'email' => $email,
+        'success' => false,
+        'saved' => $savedDocumentPath !== '',
+    ]);
+    if ($isDonor && $savedDocumentPath !== '') {
+        json_response(true, 'PDF-blanketten är sparad i dokumentmappen. E-postmottagare är inte konfigurerad ännu.', 200, [
+            'saved' => true,
+        ]);
+    }
+    json_response(false, 'Mottagar-e-post är inte konfigurerad på servern. Kontakta SIK direkt så löser vi det.', 503);
+}
+$emailTo = $configuredEmailTo;
 
 $headers = [
     'MIME-Version: 1.0',
@@ -534,9 +730,70 @@ if (!$sent) {
     json_response(false, 'Meddelandet kunde inte skickas just nu. Kontakta SIK direkt via e-post.', 500);
 }
 
+// Skicka bekräftelse till anmälaren (kvittens till deras egen inkorg).
+if ($sent && filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    $confirmationSubjectText = $isDonor
+        ? 'Tack för din anmälan till SIK'
+        : 'Tack för ditt meddelande till SIK';
+    $confirmationSubject = '=?UTF-8?B?' . base64_encode($confirmationSubjectText) . '?=';
+
+    if ($isDonor) {
+        $confirmationLines = [
+            'Hej ' . ($firstName !== '' ? $firstName : 'och tack'),
+            '',
+            'Tack för att du vill bli månadsgivare hos SIK!',
+            '',
+            'Vi har tagit emot din ifyllda autogiroanmälan med följande uppgifter:',
+            '',
+            'Belopp: ' . ($amount !== false ? $amount . ' kr/månad' : ''),
+            'Bank: ' . $bank,
+            '',
+            'Föreningen kontaktar dig så snart som möjligt om nästa steg och',
+            'eventuella uppgifter som behövs för att slutföra registreringen hos banken.',
+            '',
+            'Har du frågor är du välkommen att svara på det här mejlet eller',
+            'kontakta oss på ' . $emailTo . '.',
+            '',
+            'Med vänliga hälsningar,',
+            'Somaliska Islamiska Kulturföreningen',
+            'Lantmannavägen 42, 461 60 Trollhättan',
+        ];
+    } else {
+        $confirmationLines = [
+            'Hej ' . ($name !== '' ? $name : 'och tack'),
+            '',
+            'Tack för ditt meddelande till SIK!',
+            '',
+            'Vi har tagit emot ditt meddelande och återkommer så snart som möjligt.',
+            '',
+            'Ditt ärende:',
+            'Ämne: ' . $subject,
+            '',
+            'Med vänliga hälsningar,',
+            'Somaliska Islamiska Kulturföreningen',
+            'Lantmannavägen 42, 461 60 Trollhättan',
+        ];
+    }
+
+    $confirmationBody = implode("\n", $confirmationLines);
+    $confirmationHeaders = [
+        'MIME-Version: 1.0',
+        'From: ' . $fromName . ' <' . $fromEmail . '>',
+        'Reply-To: ' . $emailTo,
+        'X-Mailer: PHP/' . PHP_VERSION,
+        'Content-Type: text/plain; charset=UTF-8',
+    ];
+
+    if (!empty($config['smtp_enabled'])) {
+        @send_smtp_mail($config, $email, $fromEmail, $fromName, $emailTo, $confirmationSubject, $confirmationHeaders, $confirmationBody);
+    } else {
+        @mail($email, $confirmationSubject, $confirmationBody, implode("\r\n", $confirmationHeaders));
+    }
+}
+
 json_response(true, $isDonor
     ? ($savedDocumentPath !== ''
-        ? 'Tack! Din ifyllda PDF-blankett är sparad och skickad till SIK.'
-        : 'Tack! Din ifyllda PDF-blankett är skickad till SIK.')
-    : 'Tack för ditt meddelande. SIK kontaktar dig så snart som möjligt.'
-, ['saved' => $savedDocumentPath !== '']);
+        ? 'Tack! Din ifyllda PDF-blankett är sparad och skickad till SIK. En bekräftelse skickas till din e-post.'
+        : 'Tack! Din ifyllda PDF-blankett är skickad till SIK. En bekräftelse skickas till din e-post.')
+    : 'Tack för ditt meddelande. SIK kontaktar dig så snart som möjligt. En bekräftelse skickas till din e-post.'
+, 200, ['saved' => $savedDocumentPath !== '']);

@@ -10,14 +10,27 @@
 <link href="css/main.css" rel="stylesheet">
 <link href="css/responsive.css" rel="stylesheet">
 <link href="css/custom.css" rel="stylesheet">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="sv_SE">
+<meta property="og:site_name" content="SIK - Somaliska Islamiska Kulturföreningen">
+<meta property="og:title" content="Kontakt | SIK Trollhättan">
+<meta property="og:description" content="Kontakta Somaliska Islamiska Kulturföreningen — adress, e-post och vägbeskrivning.">
+<meta property="og:url" content="https://sikforening.se/contact-us.html">
+<meta property="og:image" content="https://sikforening.se/images/sik-real/facebook-profile.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Kontakt | SIK Trollhättan">
+<meta name="twitter:description" content="Kontakta Somaliska Islamiska Kulturföreningen — adress, e-post och vägbeskrivning.">
+<meta name="twitter:image" content="https://sikforening.se/images/sik-real/facebook-profile.png">
+<link rel="canonical" href="https://sikforening.se/contact-us.html">
 </head>
 <body class="sik-site">
+<a class="sik-skip-link" href="#main-content">Hoppa till huvudinnehållet</a>
 <header id="header">
 <div class="top-bar"><div class="container"><div class="top-number"><p><i class="fa fa-envelope"></i> Kontakta SIK</p></div></div></div>
 <nav class="navbar navbar-inverse" role="banner"><div class="container"><div class="navbar-header"><button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse"><span class="sr-only">Visa meny</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></button><a class="navbar-brand brand-text" href="index.html"><img src="images/sik-real/facebook-profile.png" alt="SIK logotyp" class="brand-logo"><span>SIK</span></a></div><div class="collapse navbar-collapse navbar-right"><ul class="nav navbar-nav"><li><a href="index.html">Startsida</a></li><li><a href="about-us.html">Om SIK</a></li><li><a href="prayers.html">Bönetider</a></li><li><a href="portfolio.html">Verksamhet</a></li><li><a href="stod-oss.html">Stöd oss</a></li><li class="active"><a href="contact-us.html">Kontakt</a></li></ul></div></div></nav>
 </header>
 
-<section class="page-title">
+<section id="main-content" class="page-title">
 <div class="container">
 <h1>Kontakt</h1>
 <p>Här hittar du besöksadress, e-post och vägbeskrivning till Somaliska Islamiska Moskén i Trollhättan.</p>
@@ -32,8 +45,13 @@
 </div>
 <div class="row contact-wrap">
 <div class="col-md-7">
-<div class="map-placeholder contact-map">
-<iframe title="Karta till Somaliska Islamiska Moskén i Trollhättan" src="https://www.google.com/maps?q=Lantmannav%C3%A4gen%2042%2C%20461%2060%20Trollh%C3%A4ttan&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+<div class="map-placeholder contact-map" id="sik-map-wrapper">
+<div class="sik-maps-consent" id="sik-map-consent">
+<p><i class="fa fa-map"></i> <strong>Karta från Google Maps</strong></p>
+<p>När du visar kartan delas din IP-adress med Google. Klicka på knappen för att ladda kartan, eller använd länken nedan för att öppna i Google Maps direkt.</p>
+<button type="button" class="btn btn-primary" id="sik-map-load">Visa karta</button>
+<a class="btn btn-default" href="https://www.google.com/maps/dir/?api=1&destination=Lantmannav%C3%A4gen%2042%2C%20461%2060%20Trollh%C3%A4ttan" target="_blank" rel="noopener">Öppna i Google Maps istället</a>
+</div>
 <div class="map-info">
 <h3>Hitta hit</h3>
 <p>Besöksadress: Lantmannavägen 42, 461 60 Trollhättan.</p>
@@ -101,7 +119,6 @@
 </div>
 </div>
 </footer>
-<script src="js/jquery.js"></script><script src="js/bootstrap.min.js"></script>
-<script src="js/sik-forms.js"></script>
+<script src="js/jquery.js"></script><script src="js/bootstrap.min.js"></script><script src="js/sik-forms.js?v=20260509-1"></script><script src="js/sik-map-consent.js"></script>
 </body>
 </html>

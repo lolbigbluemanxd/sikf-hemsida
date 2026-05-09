@@ -2,6 +2,8 @@ config.php
 storage/*.log
 storage/rate_limit/*.json
 storage/autogiro_documents/*.pdf
+storage/autogiro_documents/*.pdf.enc
 storage/autogiro_documents/*.json
+storage/autogiro_documents/*.key
 backups/*.zip
 localtunnel*.log

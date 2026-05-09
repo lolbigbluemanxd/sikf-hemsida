@@ -94,9 +94,102 @@
       });
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', loadTimes);
-  } else {
+  // ---------- Weekly overview ----------
+  var weeklyLoaded = false;
+
+  function dayName(d) {
+    var names = ['Sön', 'Mån', 'Tis', 'Ons', 'Tors', 'Fre', 'Lör'];
+    return names[d.getDay()];
+  }
+
+  function addDays(date, days) {
+    var d = new Date(date);
+    d.setDate(d.getDate() + days);
+    return d;
+  }
+
+  function loadWeeklyTimes() {
+    var container = document.getElementById('sik-weekly-table');
+    if (!container || weeklyLoaded) return;
+    weeklyLoaded = true;
+    container.textContent = 'Hämtar vecka…';
+
+    var today = new Date();
+    var promises = [];
+    for (var i = 0; i < 7; i++) {
+      var d = addDays(today, i);
+      var dateStr = pad(d.getDate()) + '-' + pad(d.getMonth() + 1) + '-' + d.getFullYear();
+      var url = 'https://api.aladhan.com/v1/timings/' + dateStr +
+                '?latitude=' + LAT +
+                '&longitude=' + LNG +
+                '&method=' + METHOD +
+                '&school=' + SCHOOL +
+                '&latitudeAdjustmentMethod=' + LAT_ADJUST +
+                '&tune=' + encodeURIComponent(TUNE) +
+                '&timezonestring=' + encodeURIComponent(TZ);
+      promises.push(fetch(url).then(function (r) { return r.json(); }));
+    }
+
+    Promise.all(promises)
+      .then(function (responses) {
+        var todayKey = pad(today.getDate()) + '-' + pad(today.getMonth() + 1);
+        var html = '<table class="table table-striped table-condensed">' +
+          '<thead><tr><th>Dag</th><th>Datum</th><th>Fajr</th><th>Soluppgång</th>' +
+          '<th>Dhuhr</th><th>Asr</th><th>Maghrib</th><th>Isha</th></tr></thead><tbody>';
+        responses.forEach(function (json, idx) {
+          if (!json || !json.data) return;
+          var t = json.data.timings;
+          var d = addDays(today, idx);
+          var dateKey = pad(d.getDate()) + '-' + pad(d.getMonth() + 1);
+          var rowClass = (dateKey === todayKey) ? ' class="is-today"' : '';
+          html += '<tr' + rowClass + '>' +
+            '<td>' + dayName(d) + '</td>' +
+            '<td>' + pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '</td>' +
+            '<td>' + (t.Fajr || '').slice(0, 5) + '</td>' +
+            '<td>' + (t.Sunrise || '').slice(0, 5) + '</td>' +
+            '<td>' + (t.Dhuhr || '').slice(0, 5) + '</td>' +
+            '<td>' + (t.Asr || '').slice(0, 5) + '</td>' +
+            '<td>' + (t.Maghrib || '').slice(0, 5) + '</td>' +
+            '<td>' + (t.Isha || '').slice(0, 5) + '</td>' +
+            '</tr>';
+        });
+        html += '</tbody></table>';
+        container.innerHTML = html;
+      })
+      .catch(function (err) {
+        weeklyLoaded = false;
+        container.textContent = 'Veckoöversikten kunde inte hämtas. Försök igen.';
+        if (window.console && console.warn) console.warn('SIK weekly fetch error:', err);
+      });
+  }
+
+  function attachWeeklyToggle() {
+    var btn = document.getElementById('sik-weekly-toggle');
+    var box = document.getElementById('sik-weekly-table');
+    if (!btn || !box) return;
+    btn.addEventListener('click', function () {
+      var isOpen = !box.hidden;
+      if (isOpen) {
+        box.hidden = true;
+        btn.setAttribute('aria-expanded', 'false');
+        btn.textContent = 'Visa hela veckan';
+      } else {
+        box.hidden = false;
+        btn.setAttribute('aria-expanded', 'true');
+        btn.textContent = 'Dölj veckan';
+        loadWeeklyTimes();
+      }
+    });
+  }
+
+  function init() {
     loadTimes();
+    attachWeeklyToggle();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
   }
 })();
