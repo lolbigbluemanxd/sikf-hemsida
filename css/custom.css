@@ -185,6 +185,11 @@ body.sik-site {
   text-align: center;
 }
 
+.sik-temporary-hidden,
+.navbar-inverse .navbar-nav > li.nav-cta-donor {
+  display: none !important;
+}
+
 .navbar-inverse .navbar-nav > li.nav-cta-support > a,
 .navbar-inverse .navbar-nav > li.nav-cta-support.active > a,
 .navbar-inverse .navbar-nav > li.nav-cta-support.active > a:hover,
