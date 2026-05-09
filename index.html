@@ -58,7 +58,7 @@
 </script>
 </head>
 <body class="homepage sik-site">
-<a class="sik-skip-link" href="#main-content">Hoppa till huvudinnehållet</a>
+<a class="sik-skip-link" href="#main-slider">Hoppa till huvudinnehållet</a>
 <header id="header">
 <div class="top-bar">
 <div class="container">
@@ -103,12 +103,12 @@
 </nav>
 </header>
 
-<section id="main-content" id="main-slider" class="no-margin">
-<div class="carousel slide">
+<section id="main-slider" class="no-margin">
+<div id="main-slider-carousel" class="carousel slide" data-ride="carousel" data-interval="5000">
 <ol class="carousel-indicators">
-<li data-target="#main-slider" data-slide-to="0" class="active"></li>
-<li data-target="#main-slider" data-slide-to="1"></li>
-<li data-target="#main-slider" data-slide-to="2"></li>
+<li data-target="#main-slider-carousel" data-slide-to="0" class="active"></li>
+<li data-target="#main-slider-carousel" data-slide-to="1"></li>
+<li data-target="#main-slider-carousel" data-slide-to="2"></li>
 </ol>
 <div class="carousel-inner">
 <div class="item active" style="background-image:url(images/sik-real/moske-entre.webp)">
@@ -155,8 +155,8 @@
 </div>
 </div>
 </div>
-<a class="prev hidden-xs" href="#main-slider" data-slide="prev"><i class="fa fa-chevron-left"></i></a>
-<a class="next hidden-xs" href="#main-slider" data-slide="next"><i class="fa fa-chevron-right"></i></a>
+<a class="prev hidden-xs" href="#main-slider-carousel" data-slide="prev"><i class="fa fa-chevron-left"></i></a>
+<a class="next hidden-xs" href="#main-slider-carousel" data-slide="next"><i class="fa fa-chevron-right"></i></a>
 </section>
 
 <a class="sik-donor-banner" href="stod-oss.html" aria-label="Bli månadsgivare och stötta SIK">
